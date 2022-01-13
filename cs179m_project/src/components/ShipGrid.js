@@ -1,7 +1,12 @@
 import Slot from "../model/Slot.js"
-import ContainerSlot from "./NaNSlot"
 import NaNSlot from "./NaNSlot.js"
+import UnusedSlot from "./UnusedSlot"
+import ContainerSlot from "./ContainerSlot"
+
+// import  from "./NaNSlot.js"
+
 import React from "react";
+import "../styling/Slots.css"
 
 export default class ShipGrid extends React.Component {
 
@@ -11,13 +16,13 @@ export default class ShipGrid extends React.Component {
             grid: [],
             data: null,
             row: 0,
-            column: 0
+            column: 0,
+            CELLSIZE: 95
         }
-        this.createGrid = this.createGrid.bind(this);
     }
 
     componentWillMount() {
-        this.getCsvData()
+        this.populateGridFromCSV()
         // this.createGrid()
     }
 
@@ -36,7 +41,7 @@ export default class ShipGrid extends React.Component {
         return [Number(dimensions[0]), Number(dimensions[1])]
     }
 
-    async getCsvData() {
+    async populateGridFromCSV() {
         let csvData = await this.fetchCsv();
 
         csvData = csvData.split("\n") 
@@ -53,6 +58,12 @@ export default class ShipGrid extends React.Component {
             if(containerType == "NAN"){
                 tmp.push(new NaNSlot(this.getRowAndColumnSize(line[0])))
             }
+            else if(containerType == "UNUSED") {
+                tmp.push(new UnusedSlot(this.getRowAndColumnSize(line[0])))
+            } 
+            else{
+                tmp.push(new ContainerSlot(this.getRowAndColumnSize(line[0]), line[1].substring(1,6), line[2]))
+            }          
             col++
             if (col >= this.state.column) {
                 col = 0;
@@ -64,29 +75,51 @@ export default class ShipGrid extends React.Component {
         })
     }
 
-    createGrid(){
-        // await this.getCsvData();
-        // var htmlTemp =  "" 
-        // var count = 0
-        // this.state.grid.forEach(rowOfSlots =>{
-        //     rowOfSlots.forEach(slot =>{
-        //         if(slot instanceof NaNSlot){
-        //             htmlTemp += "<h1>Test</h1>"
-        //         }
-        //     })
-        // })
-        return (
-            <h1>Test</h1>
-        )
-    }
     
     render() {
         return(
-        <div> 
-            {
-                console.log(this.state.grid)
-            }
-         </div>
+        <div className="grid"> {   
+            this.state.grid.map(rowOfSlots => 
+                rowOfSlots.map(slot => {
+                    if(slot instanceof  NaNSlot){
+                        return (
+                            <div  className="NaNSlot" style={{
+                                left: `${this.state.CELLSIZE * slot.column + 1}px`,
+                                top: `${this.state.CELLSIZE * slot.row + 1}px`,
+                                width: `${this.state.CELLSIZE - 1}px`,
+                                height: `${this.state.CELLSIZE - 1}px`,
+                                }}>
+                                    NAN
+                            </div>
+                        )
+                    }
+                    else if(slot instanceof UnusedSlot){
+                        return(
+                            <div  className="ContainerSlot" style={{
+                                left: `${this.state.CELLSIZE * slot.column + 1}px`,
+                                top: `${this.state.CELLSIZE * slot.row + 1}px`,
+                                width: `${this.state.CELLSIZE - 1}px`,
+                                height: `${this.state.CELLSIZE - 1}px`,
+                                }}>
+                                    UNUSED
+                            </div>
+                        )       
+                    }
+                    else{
+                        return(
+                            <div  className="ContainerSlot" style={{
+                                    left: `${this.state.CELLSIZE * slot.column + 1}px`,
+                                    top: `${this.state.CELLSIZE * slot.row + 1}px`,
+                                    width: `${this.state.CELLSIZE - 1}px`,
+                                    height: `${this.state.CELLSIZE - 1}px`,
+                                    }}>
+                                        {slot.name}
+                            </div>
+                        )
+                    }
+                })
+            )
+        } </div>
         );
     }
 }

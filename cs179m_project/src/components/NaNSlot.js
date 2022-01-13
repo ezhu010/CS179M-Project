@@ -4,9 +4,9 @@ export default class NaNSlot extends Slot {
     constructor(dimensions){
         super(dimensions)
     }
-    render() {
-        return(
-            <div>NAN Box</div> 
-        )
-    }
+    // render() {
+    //     return(
+    //         <div>NAN Box</div> 
+    //     )
+    // }
 }

@@ -1,0 +1,29 @@
+.NaNSlot {
+  border-style: solid;
+  border-color: black;
+  background-color: #ccc;
+  position: absolute;
+  background-position: right bottom;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.ContainerSlot {
+  border-style: solid;
+  border-color: black;
+  background-color: rgb(255, 255, 255);
+  position: absolute;
+  background-position: right bottom;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.grid {
+  position: absolute;
+  top: 15%;
+  left: 25%;
+  margin-top: -150px;
+  margin-left: -150px;
+}
