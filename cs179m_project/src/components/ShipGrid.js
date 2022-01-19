@@ -2,7 +2,7 @@ import Slot from "../model/Slot.js"
 import NaNSlot from "./NaNSlot.js"
 import UnusedSlot from "./UnusedSlot"
 import ContainerSlot from "./ContainerSlot"
-
+import { Outlet, Link } from "react-router-dom";
 // import  from "./NaNSlot.js"
 
 import React from "react";
@@ -78,7 +78,8 @@ export default class ShipGrid extends React.Component {
     
     render() {
         return(
-        <div className="grid"> {   
+        <div classname="main">        
+            <div className="grid"> {   
             this.state.grid.map(rowOfSlots => 
                 rowOfSlots.map(slot => {
                     if(slot instanceof  NaNSlot){
@@ -120,6 +121,13 @@ export default class ShipGrid extends React.Component {
                 })
             )
         } </div>
+            <div className="logform">            
+                <Link to="/logform">
+                    <button type="button">Log Form</button>
+                </Link>
+                <Outlet />
+            </div>
+        </div>
         );
     }
 }

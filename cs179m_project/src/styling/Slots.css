@@ -20,10 +20,25 @@
   align-items: center;
 }
 
+.main {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
 .grid {
-  position: absolute;
+  position: relative;
+  top: 40%;
+  left: 20%;
+  /* margin-top: -150px;
+  margin-left: -150px; */
+}
+
+.logform {
+  position: relative;
   top: 15%;
-  left: 25%;
-  margin-top: -150px;
-  margin-left: -150px;
+  left: 53%;
+  /* margin-top: -150px;
+  margin-left: -150px;  */
 }
