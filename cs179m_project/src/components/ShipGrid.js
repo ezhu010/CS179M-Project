@@ -3,6 +3,9 @@ import NaNSlot from "./NaNSlot.js"
 import UnusedSlot from "./UnusedSlot"
 import ContainerSlot from "./ContainerSlot"
 import { Outlet, Link } from "react-router-dom";
+import ToolTip from "@mui/material/Tooltip"
+import Typography from '@mui/material/Typography';
+
 // import  from "./NaNSlot.js"
 
 import React from "react";
@@ -17,17 +20,16 @@ export default class ShipGrid extends React.Component {
             data: null,
             row: 0,
             column: 0,
-            CELLSIZE: 95
+            CELLSIZE: 95,
         }
     }
 
     componentWillMount() {
         this.populateGridFromCSV()
-        // this.createGrid()
     }
 
     fetchCsv() {
-        return fetch('/data/manifest.txt').then(function (response) {
+        return fetch('/data/TipShip2.txt').then(function (response) {
             let reader = response.body.getReader();
             let decoder = new TextDecoder('utf-8');
             return reader.read().then(function (result) {
@@ -45,11 +47,13 @@ export default class ShipGrid extends React.Component {
         let csvData = await this.fetchCsv();
 
         csvData = csvData.split("\n") 
-        
+        console.log(csvData);
         let dimensions = this.getRowAndColumnSize(csvData.at(csvData.length - 1))
         this.setState({row: Number(dimensions[0]) })
         this.setState({column: Number(dimensions[1]) })
 
+        var temp = csvData.reverse()
+        console.log(temp);
         var col = 0
         var tmp = []
         csvData.forEach((line) => { 
@@ -73,12 +77,21 @@ export default class ShipGrid extends React.Component {
                 tmp = []
             }
         })
+
+        //reversing the grid orientation
+        var tmpGrid = this.state.grid
+        for (var i = 0; i < tmpGrid.length; i++){
+            var tmp = tmpGrid[tmpGrid.length - 1 - i]
+            tmpGrid[tmpGrid.length - 1 - i] = tmpGrid[i];
+            tmpGrid[i] = tmp;
+        }
+        this.setState({grid: tmpGrid})
+        console.log(this.state.grid)
     }
 
-    
     render() {
         return(
-        <div classname="main">        
+        <div classname="main">  
             <div className="grid"> {   
             this.state.grid.map(rowOfSlots => 
                 rowOfSlots.map(slot => {
@@ -86,41 +99,43 @@ export default class ShipGrid extends React.Component {
                         return (
                             <div  className="NaNSlot" style={{
                                 left: `${this.state.CELLSIZE * slot.column + 1}px`,
-                                top: `${this.state.CELLSIZE * slot.row + 1}px`,
+                                top: `${this.state.CELLSIZE * (8 - slot.row) + 1}px`,
                                 width: `${this.state.CELLSIZE - 1}px`,
                                 height: `${this.state.CELLSIZE - 1}px`,
-                                }}>
-                                    NAN
+                                }}>NAN
                             </div>
                         )
                     }
                     else if(slot instanceof UnusedSlot){
                         return(
+                           
                             <div  className="ContainerSlot" style={{
                                 left: `${this.state.CELLSIZE * slot.column + 1}px`,
-                                top: `${this.state.CELLSIZE * slot.row + 1}px`,
+                                top: `${this.state.CELLSIZE * (8 - slot.row) + 1}px`,
                                 width: `${this.state.CELLSIZE - 1}px`,
                                 height: `${this.state.CELLSIZE - 1}px`,
-                                }}>
-                                    UNUSED
+                                }}> UNUSED
                             </div>
                         )       
                     }
                     else{
                         return(
-                            <div  className="ContainerSlot" style={{
-                                    left: `${this.state.CELLSIZE * slot.column + 1}px`,
-                                    top: `${this.state.CELLSIZE * slot.row + 1}px`,
-                                    width: `${this.state.CELLSIZE - 1}px`,
-                                    height: `${this.state.CELLSIZE - 1}px`,
-                                    }}>
-                                        {slot.name}
-                            </div>
+                           <ToolTip title={<Typography fontSize={20}>{slot.name}</Typography>}>
+                                <div  onClick={() => this.setState({showMenu: true})}
+                                        className="ContainerSlot" style={{
+                                        left: `${this.state.CELLSIZE * slot.column + 1}px`,
+                                        top: `${this.state.CELLSIZE * (8 - slot.row) + 1}px`,
+                                        width: `${this.state.CELLSIZE - 1}px`,
+                                        height: `${this.state.CELLSIZE - 1}px`,
+                                        }}> {slot.name}
+                                </div>
+                            </ToolTip>
                         )
                     }
                 })
             )
-        } </div>
+        } 
+        </div>
             <div className="logform">            
                 <Link to="/logform">
                     <button type="button">Log Form</button>

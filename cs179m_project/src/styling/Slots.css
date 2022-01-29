@@ -18,6 +18,19 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  text-align: center;
+  overflow: hidden;
+}
+
+.ContainerSlot:hover {
+  border-style: solid;
+  border-color: black;
+  background-color: red;
+  background-position: right bottom;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
 }
 
 .main {
@@ -28,8 +41,8 @@
 }
 
 .grid {
-  position: relative;
-  top: 40%;
+  position: absolute;
+  top: 5%;
   left: 20%;
   /* margin-top: -150px;
   margin-left: -150px; */
@@ -41,4 +54,10 @@
   left: 53%;
   /* margin-top: -150px;
   margin-left: -150px;  */
+}
+
+.containerMenu {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }

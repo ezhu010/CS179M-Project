@@ -23,7 +23,7 @@ app.post("/post", (req, res, next) => {
   })
 next()
 }, function(req, res, next) {
-  res.send(200)
+  res.sendStatus(200)
 });
 
 
