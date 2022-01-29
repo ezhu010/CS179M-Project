@@ -29,7 +29,7 @@ export default class ShipGrid extends React.Component {
     }
 
     fetchCsv() {
-        return fetch('/data/TipShip2.txt').then(function (response) {
+        return fetch('/data/CrisDeBurg.txt').then(function (response) {
             let reader = response.body.getReader();
             let decoder = new TextDecoder('utf-8');
             return reader.read().then(function (result) {
@@ -52,17 +52,24 @@ export default class ShipGrid extends React.Component {
         this.setState({row: Number(dimensions[0]) })
         this.setState({column: Number(dimensions[1]) })
 
-        var temp = csvData.reverse()
-        console.log(temp);
         var col = 0
         var tmp = []
         csvData.forEach((line) => { 
             line = line.split(", ")
-            let containerType = line[2];
-            if(containerType == "NAN"){
+            let containerType = "";
+            if(line.length > 3) {
+                for(let i = 2; i < line.length - 1; i++)
+                    containerType += line[i] + ", "
+                containerType += line[line.length - 1]
+                console.log(containerType);
+            }
+            else {
+                containerType = line[2];
+            }
+            if(containerType.trim() === "NAN"){
                 tmp.push(new NaNSlot(this.getRowAndColumnSize(line[0])))
             }
-            else if(containerType == "UNUSED") {
+            else if(containerType.trim() === "UNUSED") {
                 tmp.push(new UnusedSlot(this.getRowAndColumnSize(line[0])))
             } 
             else{
@@ -91,7 +98,7 @@ export default class ShipGrid extends React.Component {
 
     render() {
         return(
-        <div classname="main">  
+        <div className="main">  
             <div className="grid"> {   
             this.state.grid.map(rowOfSlots => 
                 rowOfSlots.map(slot => {
