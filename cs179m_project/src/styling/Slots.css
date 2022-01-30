@@ -9,6 +9,19 @@
   align-items: center;
 }
 
+.UnusedSlot {
+  border-style: solid;
+  border-color: black;
+  background-color: rgb(255, 255, 255);
+  position: absolute;
+  background-position: right bottom;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  overflow: hidden;
+}
+
 .ContainerSlot {
   border-style: solid;
   border-color: black;
@@ -33,7 +46,7 @@
   text-align: center;
 }
 
-.main {
+.maingrid {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -42,18 +55,24 @@
 
 .grid {
   position: absolute;
-  top: 5%;
-  left: 20%;
+  /* margin-left: -1740px;
+  margin-top: 100px; */
+  margin-left: auto;
+  margin-right: auto;
   /* margin-top: -150px;
   margin-left: -150px; */
 }
 
 .logform {
-  position: relative;
-  top: 15%;
-  left: 53%;
+  position: absolute;
+  margin-left: auto;
+  margin-right: auto;
+  left: 730px;
+  bottom: 161px;
+  /* top: 15%;
+  left: 5%; */
   /* margin-top: -150px;
-  margin-left: -150px;  */
+  margin-left: -150px; */
 }
 
 .containerMenu {

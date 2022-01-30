@@ -73,7 +73,7 @@ export default class ShipGrid extends React.Component {
                 tmp.push(new UnusedSlot(this.getRowAndColumnSize(line[0])))
             } 
             else{
-                tmp.push(new ContainerSlot(this.getRowAndColumnSize(line[0]), line[1].substring(1,6), line[2]))
+                tmp.push(new ContainerSlot(this.getRowAndColumnSize(line[0]), line[1].substring(1,6), containerType))
             }          
             col++
             if (col >= this.state.column) {
@@ -98,7 +98,7 @@ export default class ShipGrid extends React.Component {
 
     render() {
         return(
-        <div className="main">  
+        <div className="maingrid">  
             <div className="grid"> {   
             this.state.grid.map(rowOfSlots => 
                 rowOfSlots.map(slot => {
@@ -116,7 +116,7 @@ export default class ShipGrid extends React.Component {
                     else if(slot instanceof UnusedSlot){
                         return(
                            
-                            <div  className="ContainerSlot" style={{
+                            <div  className="UnusedSlot" style={{
                                 left: `${this.state.CELLSIZE * slot.column + 1}px`,
                                 top: `${this.state.CELLSIZE * (8 - slot.row) + 1}px`,
                                 width: `${this.state.CELLSIZE - 1}px`,

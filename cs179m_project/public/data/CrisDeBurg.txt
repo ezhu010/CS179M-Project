@@ -12,7 +12,7 @@
 [01,12], {00000}, NAN
 [02,01], {00000}, UNUSED
 [02,02], {00000}, UNUSED
-[02,03], {00000}, Target San Diego 2323 Sports Equiment 
+[02,03], {00000}, Target San Diego 2323 Sports Equiment
 [02,04], {00000}, UNUSED
 [02,05], {00000}, UNUSED
 [02,06], {00000}, UNUSED
