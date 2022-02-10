@@ -12,10 +12,8 @@ function App() {
       <Routes>
         <Route path="/" element={<ShipGrid />}/>
         <Route path="logform" element={<LogForm />} />
-        {/* <Route path="/" element = {<div>Hello World</div>} /> */}
       </Routes>
     </BrowserRouter>
-    <RemoveContainerList/>
     </div>
   )
 }

@@ -1,3 +1,53 @@
 .removeContainerList {
+  position: absolute;
   display: flex;
+  font-size: 17px;
+  left: 1413px;
+  margin-top: 450px;
+  border-color: black;
+  border: 6px;
+  border-style: solid;
 }
+
+.MuiList-padding {
+  padding: 0px !important;
+}
+.MuiTypography-root {
+  width: 100%;
+  margin-top: 0px !important;
+  margin-bottom: 0px !important;
+}
+.MuiList-root {
+  width: 142%;
+  padding-bottom: 0px !important;
+}
+.MuiTypography-h8 {
+  text-align: center !important;
+  width: 150%;
+}
+
+.MuiListItem-root {
+  border-top: 2px;
+  border-bottom: 0px;
+  border-left: 0px;
+  border-right: 0px;
+  border-color: black;
+  border-style: solid;
+  /* text-align: center !important; */
+}
+
+.MuiListItemText-primary {
+  width: 100%;
+  text-align: center !important;
+}
+.MuiListItemText-root {
+}
+/* .css-h4y409-MuiList-root {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: relative;
+  padding-top: -4px;
+  padding-bottom: 1px;
+  width: 150%;
+} */

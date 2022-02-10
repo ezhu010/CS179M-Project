@@ -5,7 +5,7 @@ import ContainerSlot from "./ContainerSlot"
 import { Outlet, Link } from "react-router-dom";
 import ToolTip from "@mui/material/Tooltip"
 import Typography from '@mui/material/Typography';
-
+import RemoveContainerList from "./RemoveContainerList.js";
 // import  from "./NaNSlot.js"
 
 import React from "react";
@@ -29,7 +29,7 @@ export default class ShipGrid extends React.Component {
     }
 
     fetchCsv() {
-        return fetch('/data/CrisDeBurg.txt').then(function (response) {
+        return fetch('/data/CunardBlue.txt').then(function (response) {
             let reader = response.body.getReader();
             let decoder = new TextDecoder('utf-8');
             return reader.read().then(function (result) {
@@ -99,7 +99,7 @@ export default class ShipGrid extends React.Component {
     render() {
         return(
         <div className="maingrid">  
-            <div className="grid"> {   
+         {   
             this.state.grid.map(rowOfSlots => 
                 rowOfSlots.map(slot => {
                     if(slot instanceof  NaNSlot){
@@ -115,7 +115,6 @@ export default class ShipGrid extends React.Component {
                     }
                     else if(slot instanceof UnusedSlot){
                         return(
-                           
                             <div  className="UnusedSlot" style={{
                                 left: `${this.state.CELLSIZE * slot.column + 1}px`,
                                 top: `${this.state.CELLSIZE * (8 - slot.row) + 1}px`,
@@ -142,14 +141,15 @@ export default class ShipGrid extends React.Component {
                 })
             )
         } 
+        
+        <RemoveContainerList/>
+        <div className="logform">            
+            <Link to="/logform">
+                <button type="button">Log Form</button>
+            </Link>
+            <Outlet />
         </div>
-            <div className="logform">            
-                <Link to="/logform">
-                    <button type="button">Log Form</button>
-                </Link>
-                <Outlet />
-            </div>
-        </div>
+    </div>
         );
     }
 }
