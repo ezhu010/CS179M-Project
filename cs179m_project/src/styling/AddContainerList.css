@@ -1,0 +1,18 @@
+.addContainerList {
+  position: absolute;
+  display: flex;
+  font-size: 17px;
+  left: 1413px;
+  top: 440px;
+  border-color: black;
+  border: 6px;
+  border-style: solid;
+}
+
+.addContainerButton {
+  position: absolute;
+  display: flex;
+  font-size: 17px;
+  left: 1575px;
+  top: 800px;
+}

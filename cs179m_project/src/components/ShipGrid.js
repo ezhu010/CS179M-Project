@@ -6,6 +6,7 @@ import { Outlet, Link } from "react-router-dom";
 import ToolTip from "@mui/material/Tooltip"
 import Typography from '@mui/material/Typography';
 import RemoveContainerList from "./RemoveContainerList.js";
+import AddContainerList from "./AddContainerList";
 // import  from "./NaNSlot.js"
 
 import React from "react";
@@ -21,10 +22,13 @@ export default class ShipGrid extends React.Component {
             row: 0,
             column: 0,
             CELLSIZE: 95,
+            clickedContainer: false, 
         }
     }
 
     componentWillMount() {
+        localStorage["slots"] = JSON.stringify([])
+        localStorage["addContainers"] = JSON.stringify([])
         this.populateGridFromCSV()
     }
 
@@ -47,7 +51,6 @@ export default class ShipGrid extends React.Component {
         let csvData = await this.fetchCsv();
 
         csvData = csvData.split("\n") 
-        console.log(csvData);
         let dimensions = this.getRowAndColumnSize(csvData.at(csvData.length - 1))
         this.setState({row: Number(dimensions[0]) })
         this.setState({column: Number(dimensions[1]) })
@@ -61,7 +64,6 @@ export default class ShipGrid extends React.Component {
                 for(let i = 2; i < line.length - 1; i++)
                     containerType += line[i] + ", "
                 containerType += line[line.length - 1]
-                console.log(containerType);
             }
             else {
                 containerType = line[2];
@@ -93,7 +95,24 @@ export default class ShipGrid extends React.Component {
             tmpGrid[i] = tmp;
         }
         this.setState({grid: tmpGrid})
-        console.log(this.state.grid)
+    }
+
+    checkDuplicates(prevContainer, slot){
+        for(var i = 0; i < prevContainer.length; i++){
+            if(prevContainer[i].column == slot.column && prevContainer[i].row == slot.row){
+                return true;
+            }
+        }
+        return false
+    }
+
+    addToRemoveContainerList(slot){
+        this.setState({clickedContainer: !this.state.clickedContainer})
+        var prevContainer = JSON.parse(localStorage["slots"]);
+        if(!this.checkDuplicates(prevContainer, slot)){
+            prevContainer.push(slot)
+            localStorage["slots"] = JSON.stringify(prevContainer);
+        }
     }
 
     render() {
@@ -127,7 +146,7 @@ export default class ShipGrid extends React.Component {
                     else{
                         return(
                            <ToolTip title={<Typography fontSize={20}>{slot.name}</Typography>}>
-                                <div  onClick={() => this.setState({showMenu: true})}
+                                <div  onClick={() => this.addToRemoveContainerList(slot)}
                                         className="ContainerSlot" style={{
                                         left: `${this.state.CELLSIZE * slot.column + 1}px`,
                                         top: `${this.state.CELLSIZE * (8 - slot.row) + 1}px`,
@@ -142,7 +161,8 @@ export default class ShipGrid extends React.Component {
             )
         } 
         
-        <RemoveContainerList/>
+        <RemoveContainerList clickedContainer={this.state.clickedContainer}/>
+        <AddContainerList/>
         <div className="logform">            
             <Link to="/logform">
                 <button type="button">Log Form</button>

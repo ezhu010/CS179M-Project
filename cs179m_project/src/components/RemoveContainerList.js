@@ -18,42 +18,44 @@ const Demo = styled('div')(({ theme }) => ({
   backgroundColor: theme.palette.background.paper,
 }));
 
-const Row = ({index, style}) => {
-    //     <ListItem key={index} component="div" disablePadding>
-  //     {/* <ListItemText component="div">{item.value}</ListItemText> */}
-  //     </ListItem>
-}
-
-
 class RemoveContainerList extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      listItems:  [{value: "item1"}, {value: "item2"},{value: "item3"}], 
-      // listItemsCount: 4,
+      listItems:  JSON.parse(localStorage["slots"]), 
       listItemsSize: 80
     }
     this.deleteContainer = this.deleteContainer.bind(this);
     this.Row = this.Row.bind(this);
   }
 
+componentWillReceiveProps(props) {
+  const { clickedContainer } = this.props;
+  if (props.clickedContainer !== clickedContainer) {
+       this.setState({listItems: JSON.parse(localStorage["slots"])})
+  }
+}
+
   deleteContainer(indexContainer) {
-    console.log(indexContainer);
+    var prevContainer = JSON.parse(localStorage["slots"])
+    var newContainer = prevContainer.filter((container, index) => {
+        return index != indexContainer
+    })
+
+    localStorage["slots"] = JSON.stringify(newContainer)
     var temp = this.state.listItems.filter((item, index) => {
       return index != indexContainer
     })
-    console.log(temp)
     this.setState( {listItems: [...temp]})
     this.forceUpdate()
-    console.log(this.state.listItems);
   }
+
 
   Row ({index, style}) {
     return(
-
-        <ListItem key={index} component="div" disablePadding>
+        <ListItem key={index} component="div" style={style} disablePadding>
               <ListItemButton>
-      <ListItemText component="div">{this.state.listItems[index].value}</ListItemText>
+      <ListItemText onClick={() => this.test()}component="div">{this.state.listItems[index].name}</ListItemText>
       <TiDelete onClick={() => this.deleteContainer(index)}/>
            </ListItemButton>
       </ListItem>
@@ -63,7 +65,7 @@ class RemoveContainerList extends Component {
 
     render() {
         return (
-             <Box className="removeContainerList"sx={{ flexGrow: 1, maxWidth: 700 }}>
+      <Box className="removeContainerList" sx={{ flexGrow: 1, maxWidth: 800 }}>
         <Grid item xs={12} md={6}>
           <Typography sx={{ mt: 4, mb: 2 }}  padding="10px" width="200px" variant="h8" component="div">
             Remove Container List
@@ -71,7 +73,7 @@ class RemoveContainerList extends Component {
           <List>
               <Demo>
             <FixedSizeList 
-                height={this.state.listItems.length * this.state.listItemsSize}
+                height={300}
                 width={360}
                 itemSize={this.state.listItemsSize}
                 itemCount={this.state.listItems.length}
