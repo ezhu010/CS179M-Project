@@ -27,6 +27,25 @@ next()
 });
 
 
+app.post("/uploadfile", (req, res, next) => {
+  // put the file in public/data folder and make sure data folder is empty
+  var fileData = Object.keys(req.body)
+  var fileContents = ""
+  for(var line of fileData){
+    fileContents += line
+  } 
+  fs.appendFile("../cs179m_project/public/data/manifest.txt", fileContents, err => {
+    if(err) {
+      console.log(err)
+    }
+  })
+  console.log("testing here");
+next()
+}, function(req, res, next) {
+  res.sendStatus(200)
+});
+
+
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, console.log(`Server started on port ${PORT}`));
 

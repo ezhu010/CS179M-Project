@@ -21,7 +21,7 @@ const LogForm = () => {
             .post('http://localhost:8080/post', sendData)
             .then((res) => { 
                 if(res.status == 200){
-                    window.location.href="/";
+                    // window.location.href="/";
                 }
             })
             .catch(err => {
@@ -32,7 +32,7 @@ const LogForm = () => {
 
   return (
     <div> 
-        <form action="../../post" method="post"  onSubmit={handleClockIn}>
+        <form action="" method="post"  onSubmit={handleClockIn}>
             <label>
                 Name:
                 <input type="text" name="name" required />

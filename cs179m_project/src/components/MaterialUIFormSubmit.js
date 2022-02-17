@@ -1,8 +1,11 @@
-import React, { useReducer } from "react";
+import React, { useReducer, useState} from "react";
 import { Button, Icon, TextField, Paper, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 
+
 export function MaterialUIFormSubmit(props) {
+
+
   const useStyles = makeStyles((theme) => ({
     button: {
       margin: theme.spacing(1)
@@ -38,21 +41,35 @@ export function MaterialUIFormSubmit(props) {
     }
   );
 
+
+
+
   const handleSubmit = (evt) => {
     evt.preventDefault();
     let data = { formInput }
     var container = {}
     container.name = data.formInput.name
     container.weight = data.formInput.weight
-    var prevContainer = JSON.parse(localStorage.getItem("addContainers"))
-    prevContainer.push(container)
-    localStorage.setItem("addContainers", JSON.stringify(prevContainer))
+    if (container.name != "" && Number.isInteger(Number(container.weight)) && Number(container.weight) >= 0 && Number(container.weight) < 1000000) {
+      var prevContainer = JSON.parse(localStorage.getItem("addContainers"))
+      prevContainer.push(container)
+      localStorage.setItem("addContainers", JSON.stringify(prevContainer))
+      props.sendIsClicked()
+      evt.target[0].value = ""
+      evt.target[1].value = "00000"
+      alert("Container Added")
+    }
+    else{
+      evt.target[0].value = ""
+      evt.target[1].value = "00000"
+      alert("Error with container name or weight")
+    }
   };
 
   const handleInput = (evt) => {
     const name = evt.target.name;
+    console.log(name)
     const newValue = evt.target.value;
-    console.log(newValue)
     setFormInput({ [name]: newValue });
   };
 

@@ -41,6 +41,7 @@ class AddContainerList extends Component {
             listItems: JSON.parse(localStorage["addContainers"]), 
             listItemsSize: 80,
             open: false, 
+            addContainerClicked: false
         }
         this.handleOpen = this.handleOpen.bind(this);
         this.handleClose = this.handleClose.bind(this);
@@ -85,8 +86,12 @@ class AddContainerList extends Component {
     }
 
     handleClose(){
-        this.setState({ listItems: JSON.parse(localStorage.getItem("addContainers"))})
+        // this.setState({ listItems: JSON.parse(localStorage.getItem("addContainers"))})
         this.setState({open: false})
+    }
+
+    sendIsClicked(){
+
     }
 
     render(){
@@ -101,6 +106,9 @@ class AddContainerList extends Component {
                    <MaterialUIFormSubmit
                         formName="Add Container Form"
                         formDescription="This form is for adding containers. The inputs are name and weight of the container."
+                        sendIsClicked = {() => {
+                            this.setState({ listItems: JSON.parse(localStorage.getItem("addContainers"))})
+                        }}
                     />
                 </Modal>
                 <Box className="addContainerList" sx={{ flexGrow: 1, maxWidth: 800 }}>
@@ -122,7 +130,7 @@ class AddContainerList extends Component {
                         </List>
                     </Grid>
                 </Box>
-                <Button className="addContainerButton" onClick={()=>{this.handleOpen()}}>Test</Button>
+                <Button className="addContainerButton" onClick={()=>{this.handleOpen()}}>Add Container</Button>
             </div>
         )
     }

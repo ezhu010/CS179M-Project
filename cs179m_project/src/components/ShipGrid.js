@@ -7,6 +7,7 @@ import ToolTip from "@mui/material/Tooltip"
 import Typography from '@mui/material/Typography';
 import RemoveContainerList from "./RemoveContainerList.js";
 import AddContainerList from "./AddContainerList";
+import ManifestUpload from "./ManifestUpload.js";
 // import  from "./NaNSlot.js"
 
 import React from "react";
@@ -23,6 +24,8 @@ export default class ShipGrid extends React.Component {
             column: 0,
             CELLSIZE: 95,
             clickedContainer: false, 
+            showGrid: false,
+            isfileUploaded: false,
         }
     }
 
@@ -33,7 +36,7 @@ export default class ShipGrid extends React.Component {
     }
 
     fetchCsv() {
-        return fetch('/data/CunardBlue.txt').then(function (response) {
+        return fetch('/data/manifest.txt').then(function (response) {
             let reader = response.body.getReader();
             let decoder = new TextDecoder('utf-8');
             return reader.read().then(function (result) {
@@ -118,7 +121,13 @@ export default class ShipGrid extends React.Component {
     render() {
         return(
         <div className="maingrid">  
-         {   
+
+        <ManifestUpload checkUpload={() => {
+                console.log("file finished")
+                this.setState({isfileUploaded: true})
+        }}/>
+        
+         {   this.state.isfileUploaded ?
             this.state.grid.map(rowOfSlots => 
                 rowOfSlots.map(slot => {
                     if(slot instanceof  NaNSlot){
@@ -158,7 +167,7 @@ export default class ShipGrid extends React.Component {
                         )
                     }
                 })
-            )
+            ) : null
         } 
         
         <RemoveContainerList clickedContainer={this.state.clickedContainer}/>
