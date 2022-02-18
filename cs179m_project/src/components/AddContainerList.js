@@ -45,12 +45,11 @@ class AddContainerList extends Component {
         }
         this.handleOpen = this.handleOpen.bind(this);
         this.handleClose = this.handleClose.bind(this);
-        this.addContainer = this.addContainer.bind(this);
         this.Row = this.Row.bind(this);
     }
 
-    addContainer(){
-        
+    componentWillReceiveProps(){
+        this.setState({listItems: JSON.parse(localStorage["addContainers"])})
     }
 
     addButtonPressed(){

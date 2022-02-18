@@ -8,6 +8,7 @@ import Typography from '@mui/material/Typography';
 import RemoveContainerList from "./RemoveContainerList.js";
 import AddContainerList from "./AddContainerList";
 import ManifestUpload from "./ManifestUpload.js";
+import axios from 'axios';
 // import  from "./NaNSlot.js"
 
 import React from "react";
@@ -18,6 +19,7 @@ export default class ShipGrid extends React.Component {
     constructor(props){
         super(props);
         this.state = {
+            manifestData: "",
             grid: [],
             data: null,
             row: 0,
@@ -26,38 +28,39 @@ export default class ShipGrid extends React.Component {
             clickedContainer: false, 
             showGrid: false,
             isfileUploaded: false,
+            manifestName: "",
         }
     }
 
     componentWillMount() {
         localStorage["slots"] = JSON.stringify([])
         localStorage["addContainers"] = JSON.stringify([])
-        this.populateGridFromCSV()
     }
 
-    fetchCsv() {
-        return fetch('/data/manifest.txt').then(function (response) {
-            let reader = response.body.getReader();
-            let decoder = new TextDecoder('utf-8');
-            return reader.read().then(function (result) {
-                return decoder.decode(result.value);
-            });
-        });
-    }
+    // fetchCsv() {
+    //     return fetch('/data/manifest.txt').then(function (response) {
+    //         let reader = response.body.getReader();
+    //         let decoder = new TextDecoder('utf-8');
+    //         return reader.read().then(function (result) {
+    //             return decoder.decode(result.value);
+    //         });
+    //     });
+    // }
 
     getRowAndColumnSize(line){
         let dimensions = line.substring(1, 6).split(",")
         return [Number(dimensions[0]), Number(dimensions[1])]
     }
 
-    async populateGridFromCSV() {
-        let csvData = await this.fetchCsv();
-
+    populateGridFromCSV() {
+        // let csvData = await this.fetchCsv();
+        console.log("testing")
+        let csvData = this.state.manifestData;
         csvData = csvData.split("\n") 
         let dimensions = this.getRowAndColumnSize(csvData.at(csvData.length - 1))
         this.setState({row: Number(dimensions[0]) })
         this.setState({column: Number(dimensions[1]) })
-
+        var containerCount = 0;
         var col = 0
         var tmp = []
         csvData.forEach((line) => { 
@@ -79,6 +82,7 @@ export default class ShipGrid extends React.Component {
             } 
             else{
                 tmp.push(new ContainerSlot(this.getRowAndColumnSize(line[0]), line[1].substring(1,6), containerType))
+                ++containerCount    
             }          
             col++
             if (col >= this.state.column) {
@@ -89,6 +93,21 @@ export default class ShipGrid extends React.Component {
                 tmp = []
             }
         })
+            console.log(this.state.manifestName)
+            var sendData = `Manifest ${this.state.manifestName} is opened, there are ${containerCount} containers on the ship\n`
+            var manifestInfo = {}
+            manifestInfo.logData = sendData        
+            axios
+                .post('http://localhost:8080/manifestLogWrite', manifestInfo)
+                .then((res) => { 
+                    if(res.status == 200){
+                        // window.location.href="/";
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    return
+            });
 
         //reversing the grid orientation
         var tmpGrid = this.state.grid
@@ -122,10 +141,20 @@ export default class ShipGrid extends React.Component {
         return(
         <div className="maingrid">  
 
-        <ManifestUpload checkUpload={() => {
+        <ManifestUpload sendManifestData={(logData, manifestFileName) => {
                 console.log("file finished")
+                localStorage.clear()
+                localStorage["slots"] = JSON.stringify([])
+                localStorage["addContainers"] = JSON.stringify([])
                 this.setState({isfileUploaded: true})
-        }}/>
+                this.setState({manifestData: logData})
+                this.populateGridFromCSV(this.state.manifestName)
+                this.forceUpdate()
+        }}
+        sendManifestName={(manifestFileName) =>{
+                this.setState({manifestName: manifestFileName})
+        }}
+        />
         
          {   this.state.isfileUploaded ?
             this.state.grid.map(rowOfSlots => 
@@ -137,7 +166,7 @@ export default class ShipGrid extends React.Component {
                                 top: `${this.state.CELLSIZE * (8 - slot.row) + 1}px`,
                                 width: `${this.state.CELLSIZE - 1}px`,
                                 height: `${this.state.CELLSIZE - 1}px`,
-                                }}>NAN
+                                }} key={(slot.row - 1) * 12 + (slot.column - 1)} id={(slot.row - 1) * 12 + (slot.column - 1)}>NAN
                             </div>
                         )
                     }
@@ -148,7 +177,7 @@ export default class ShipGrid extends React.Component {
                                 top: `${this.state.CELLSIZE * (8 - slot.row) + 1}px`,
                                 width: `${this.state.CELLSIZE - 1}px`,
                                 height: `${this.state.CELLSIZE - 1}px`,
-                                }}> UNUSED
+                                }} key={(slot.row - 1) * 12 + (slot.column - 1)} id={(slot.row - 1) * 12 + (slot.column - 1)}> UNUSED
                             </div>
                         )       
                     }
@@ -161,7 +190,7 @@ export default class ShipGrid extends React.Component {
                                         top: `${this.state.CELLSIZE * (8 - slot.row) + 1}px`,
                                         width: `${this.state.CELLSIZE - 1}px`,
                                         height: `${this.state.CELLSIZE - 1}px`,
-                                        }}> {slot.name}
+                                        }} key={(slot.row - 1) * 12 + (slot.column - 1)} id={(slot.row - 1) * 12 + (slot.column - 1)}> {slot.name}
                                 </div>
                             </ToolTip>
                         )
@@ -170,8 +199,8 @@ export default class ShipGrid extends React.Component {
             ) : null
         } 
         
-        <RemoveContainerList clickedContainer={this.state.clickedContainer}/>
-        <AddContainerList/>
+        <RemoveContainerList clickedContainer={this.state.clickedContainer} isfileUploaded={this.state.isfileUploaded}/>
+        <AddContainerList isfileUploaded={this.state.isfileUploaded}/>
         <div className="logform">            
             <Link to="/logform">
                 <button type="button">Log Form</button>

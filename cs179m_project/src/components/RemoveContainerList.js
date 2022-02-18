@@ -30,10 +30,16 @@ class RemoveContainerList extends Component {
   }
 
 componentWillReceiveProps(props) {
-  const { clickedContainer } = this.props;
-  if (props.clickedContainer !== clickedContainer) {
-       this.setState({listItems: JSON.parse(localStorage["slots"])})
-  }
+  // const { clickedContainer, isfileUploaded } = this.props;
+  this.setState({listItems: JSON.parse(localStorage["slots"])})
+  // console.log("HERE ------")
+  // if (props.clickedContainer !== clickedContainer) {
+  //      this.setState({listItems: JSON.parse(localStorage["slots"])})
+  // }
+  //   if (props.isfileUploaded !== isfileUploaded) {
+  //     console.log("testing")
+  //      this.setState({listItems: JSON.parse(localStorage["slots"])})
+  // }
 }
 
   deleteContainer(indexContainer) {

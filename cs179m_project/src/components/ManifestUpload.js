@@ -9,12 +9,26 @@ export default class ManifestUpload extends Component {
         selectedFile: null
       };
 }
+
+  getBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = error => reject(error);
+    });
+}
     
     // On file select (from the pop up)
     onFileChange = event => {
-        event.preventDefault()
-      // Update the state
-      this.setState({ selectedFile: event.target.files[0] });
+      event.preventDefault()
+      console.log(event.target.files[0].name)
+      this.props.sendManifestName(event.target.files[0].name)
+      this.getBase64(event.target.files[0]).then(
+          data => {
+            this.props.sendManifestData(atob(data.substr(23), ""))
+          }
+        );
     };
     
     // On file upload (click the upload button)
@@ -22,12 +36,8 @@ export default class ManifestUpload extends Component {
     event.preventDefault()
     console.log(event)
       const formData = new FormData();
-    //   formData.append(
-    //     "myFile",
-    //     this.state.selectedFile,
-    //     this.state.selectedFile.name
-    //   );
-      console.log(this.state.selectedFile);
+     
+      console.log(JSON.stringify(this.state.selectedFile));
       console.log(formData)
       axios.post("http://localhost:8080/uploadfile", this.state.selectedFile).then((res) => { 
             if(res.status == 200){
@@ -40,52 +50,11 @@ export default class ManifestUpload extends Component {
         });
     };
     
-    // File content to be displayed after
-    // file upload is complete
-    fileData = () => {
-        if (this.state.selectedFile) {
-         
-            return (
-                <div>
-                    <h2>File Details:</h2>
-                    <p>File Name: {this.state.selectedFile.name}</p>
-                    <p>File Type: {this.state.selectedFile.type}</p>
-
-                    <p>
-                        Last Modified:{" "}
-                        {this.state.selectedFile.lastModifiedDate.toDateString()}
-                    </p>  
-                </div>
-            ); 
-
-        } 
-        else {
-            return (
-                <div>
-                    <br/>
-                    <h4>Choose before Pressing the Upload button</h4>
-                </div>
-            );
-        }
-    };
-    
     render() {
       return (
-        <div>
-            <h1>
-              GeeksforGeeks
-            </h1>
-            <h3>
-              File Upload using React!
-            </h3>
             <div>
-                <form action="" method="post" onSubmit={this.onFileUpload}>
-                <input type="file" onChange={this.onFileChange} />
-                <input type="submit" value="Upload" />
-                </form>
+                <input className="manifestupload" type="file" onChange={this.onFileChange}/>
             </div>
-          {this.fileData()}
-        </div>
       );
     }
 }

@@ -15,7 +15,7 @@ app.use(
 );
   
 app.post("/post", (req, res, next) => {
-  fs.appendFile('../cs179m_project/Logs/test.txt', req.body.datetime, err => {
+  fs.appendFile('../cs179m_project/Logs/log.txt', req.body.datetime, err => {
     if (err) {
       console.error(err)
       return
@@ -26,25 +26,38 @@ next()
   res.sendStatus(200)
 });
 
+// app.post("/uploadfile", (req, res, next) => {
+//   // put the file in public/data folder and make sure data folder is empty
+//   var fileData = Object.keys(req.body)
+//   var fileContents = ""
+//   for(var line of fileData){
+//     fileContents += line
+//   } 
+//   fs.appendFile("../cs179m_project/public/data/manifest.txt", fileContents, err => {
+//     if(err) {
+//       console.log(err)
+//     }
+//   })
+// next()
+// }, function(req, res, next) {
+//   res.sendStatus(200)
+// });
 
-app.post("/uploadfile", (req, res, next) => {
-  // put the file in public/data folder and make sure data folder is empty
-  var fileData = Object.keys(req.body)
-  var fileContents = ""
-  for(var line of fileData){
-    fileContents += line
-  } 
-  fs.appendFile("../cs179m_project/public/data/manifest.txt", fileContents, err => {
-    if(err) {
-      console.log(err)
+//For log after manifest is uploaded
+app.post("/manifestLogWrite", (req, res, next) => {
+  console.log("testing in axios post");
+  fs.appendFile('../cs179m_project/Logs/log.txt', req.body.logData, err => {
+    if (err) {
+      console.error(err)
+      return
     }
   })
-  console.log("testing here");
-next()
-}, function(req, res, next) {
-  res.sendStatus(200)
-});
-
+  next()
+}, 
+  function(req, res, next) {
+    res.sendStatus(200)
+  }
+);
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, console.log(`Server started on port ${PORT}`));

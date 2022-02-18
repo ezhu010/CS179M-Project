@@ -2,18 +2,17 @@ import axios from 'axios';
 import Redirect from 'react-router-dom'
 
 const LogForm = () => {
-
     let handleClockIn = (event) =>{
-        event.preventDefault()
+          event.preventDefault()
         var name = event.target.name.value
-        var clockStatus = event.target.clockStatus.value
+        // var clockStatus = event.target.clockStatus.value
         var currentdate = new Date();
-        var datetime = name + " " + clockStatus  +  " at " + currentdate.getDate() + "/"
+        var datetime = name + " " + "Clocked In"  +  " at " + currentdate.getDate() + "/"
                 + (currentdate.getMonth() + 1)  + "/" 
                 + currentdate.getFullYear() + " @ "  
-                + currentdate.getHours() + ":"  
-                + currentdate.getMinutes() + ":" 
-                + currentdate.getSeconds();
+                + (currentdate.getHours()<10 ? '0' + currentdate.getHours() : currentdate.getHours()) + ":"  
+                + (currentdate.getMinutes()<10 ? '0' + currentdate.getMinutes() : currentdate.getMinutes()) + ":" 
+                + (currentdate.getSeconds()<10 ? '0' + currentdate.getSeconds() : currentdate.getSeconds())
         var sendData = {
             "datetime"  :  datetime + '\n'
         }
@@ -21,7 +20,7 @@ const LogForm = () => {
             .post('http://localhost:8080/post', sendData)
             .then((res) => { 
                 if(res.status == 200){
-                    // window.location.href="/";
+                    window.location.href="/";
                 }
             })
             .catch(err => {
@@ -37,12 +36,7 @@ const LogForm = () => {
                 Name:
                 <input type="text" name="name" required />
             </label>
-             <select required name="clockStatus">
-                <option value="" selected disabled hidden>Choose here</option>
-                <option>Clock In</option>
-                <option>Clock Out</option>
-            </select>
-            <input type="submit" value="Submit" />
+            <input type="Submit" value="Clock In" />
         </form>
     </div> 
     );
