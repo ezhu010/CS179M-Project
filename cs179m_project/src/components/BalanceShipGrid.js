@@ -13,6 +13,7 @@ import axios from 'axios';
 
 import React from "react";
 import "../styling/Slots.css"
+import Node from "../Balancing/Node"
 
 export default class BalanceShipGrid extends React.Component {
 
@@ -42,7 +43,7 @@ export default class BalanceShipGrid extends React.Component {
 
     getRowAndColumnSize(line){
         let dimensions = line.substring(1, 6).split(",")
-        return [Number(dimensions[0]), Number(dimensions[1])]
+        return [Number(dimensions[0] - 1), Number(dimensions[1] - 1)]
     }
 
     populateGridFromCSV() {
@@ -50,8 +51,9 @@ export default class BalanceShipGrid extends React.Component {
         let csvData = this.state.manifestData;
         csvData = csvData.split("\n") 
         let dimensions = this.getRowAndColumnSize(csvData.at(csvData.length - 1))
-        this.setState({row: Number(dimensions[0]) })
-        this.setState({column: Number(dimensions[1]) })
+        console.log("dimensions", dimensions);
+        this.setState({row: Number(dimensions[0]) + 1})
+        this.setState({column: Number(dimensions[1]) + 1})
         var containerCount = 0;
         var col = 0
         var tmp = []
@@ -149,61 +151,59 @@ export default class BalanceShipGrid extends React.Component {
     }
 
     isBalanced(){
-        console.log(this.state.allContainers);
+        // console.log(this.state.allContainers);
         var leftSide = this.getPortSideWeight()
         var rightSide = this.getStarboardSideWeight()
-        console.log((leftSide == rightSide || (leftSide / rightSide >= 0.9 && leftSide / rightSide <= 1.1)));
+        // console.log((leftSide == rightSide || (leftSide / rightSide >= 0.9 && leftSide / rightSide <= 1.1)));
         this.setState({isShipBalanced:(leftSide == rightSide || (leftSide / rightSide >= 0.9 && leftSide / rightSide <= 1.1))})
         this.setState({useSift: this.isPossibleToBalance()})
     }
     
-findMin(arr, n)
-{
-    let sum = 0;
-    for (let i = 0; i < n; i++)
-        sum += arr[i];
- 
-    let dp = new Array(n + 1);
-
-    for (let i = 0; i <= n; i++) {
-        dp[i] = new Array(sum + 1);
-        for(let j = 0; j <= sum; j++) {
-              
-            if(j == 0)
-                dp[i][j] = true;
-        }
-    }
- 
-    for (let i = 1; i <= sum; i++)
-        dp[0][i] = false;
-
-    for (let i=1; i<=n; i++)
+    findMin(arr, n)
     {
-        for (let j=1; j<=sum; j++)
-        {
-            dp[i][j] = dp[i-1][j];
-
-            if (arr[i-1] <= j)
-                dp[i][j] |= dp[i-1][j-arr[i-1]];
-        }
-    }
-
-    let diff = Number.MAX_VALUE;
+        let sum = 0;
+        for (let i = 0; i < n; i++)
+            sum += arr[i];
     
-    for (let j=Math.floor(sum/2); j>=0; j--)
-    {
+        let dp = new Array(n + 1);
 
-        if (dp[n][j] == true)
-        {
-            diff = sum-2*j;
-            break;
+        for (let i = 0; i <= n; i++) {
+            dp[i] = new Array(sum + 1);
+            for(let j = 0; j <= sum; j++) {
+                
+                if(j == 0)
+                    dp[i][j] = true;
+            }
         }
-    }
-    return diff;
-}
-	
-		
+    
+        for (let i = 1; i <= sum; i++)
+            dp[0][i] = false;
 
+        for (let i=1; i<=n; i++)
+        {
+            for (let j=1; j<=sum; j++)
+            {
+                dp[i][j] = dp[i-1][j];
+
+                if (arr[i-1] <= j)
+                    dp[i][j] |= dp[i-1][j-arr[i-1]];
+            }
+        }
+
+        let diff = Number.MAX_VALUE;
+        
+        for (let j=Math.floor(sum/2); j>=0; j--)
+        {
+
+            if (dp[n][j] == true)
+            {
+                diff = sum-2*j;
+                break;
+            }
+        }
+        return diff;
+    }
+        
     isPossibleToBalance(){
         let weights = []
         let w = 0;
@@ -212,12 +212,11 @@ findMin(arr, n)
             weights.push(parseInt(container.weight))
         }
         let minDiff = this.findMin(weights, weights.length)
-        console.log(minDiff);
+        // console.log(minDiff);
         let leftSide = (w / 2) + (minDiff / 2)
         let rightSide = (w / 2) - (minDiff / 2)
         return (leftSide == rightSide || (leftSide / rightSide >= 0.9 && leftSide / rightSide <= 1.1))
     }
-
 
     performSift(){
         console.log("performing sift")
@@ -285,7 +284,10 @@ findMin(arr, n)
             this.performSift()
         }  
         else{
-            
+            console.log("Balancing Ship")
+            console.log(this.state.grid)
+            let currNode = new Node(this.state.grid)
+            currNode.generateAllChildren()
         }
     }
 
@@ -314,7 +316,7 @@ findMin(arr, n)
                         return (
                             <div  className="NaNSlot" style={{
                                 left: `${this.state.CELLSIZE * slot.column + 1}px`,
-                                top: `${this.state.CELLSIZE * (8 - slot.row) + 1}px`,
+                                top: `${this.state.CELLSIZE * (7 - slot.row) + 1}px`,
                                 width: `${this.state.CELLSIZE - 1}px`,
                                 height: `${this.state.CELLSIZE - 1}px`,
                                 }} key={(slot.row - 1) * 12 + (slot.column - 1)} id={(slot.row - 1) * 12 + (slot.column - 1)}>NAN
@@ -325,7 +327,7 @@ findMin(arr, n)
                         return(
                             <div  className="UnusedSlot" style={{
                                 left: `${this.state.CELLSIZE * slot.column + 1}px`,
-                                top: `${this.state.CELLSIZE * (8 - slot.row) + 1}px`,
+                                top: `${this.state.CELLSIZE * (7 - slot.row) + 1}px`,
                                 width: `${this.state.CELLSIZE - 1}px`,
                                 height: `${this.state.CELLSIZE - 1}px`,
                                 }} key={(slot.row - 1) * 12 + (slot.column - 1)} id={(slot.row - 1) * 12 + (slot.column - 1)}> UNUSED
@@ -338,7 +340,7 @@ findMin(arr, n)
                                 <div
                                         className="ContainerSlot" style={{
                                         left: `${this.state.CELLSIZE * slot.column + 1}px`,
-                                        top: `${this.state.CELLSIZE * (8 - slot.row) + 1}px`,
+                                        top: `${this.state.CELLSIZE * (7 - slot.row) + 1}px`,
                                         width: `${this.state.CELLSIZE - 1}px`,
                                         height: `${this.state.CELLSIZE - 1}px`,
                                         }} key={(slot.row - 1) * 12 + (slot.column - 1)} id={(slot.row - 1) * 12 + (slot.column - 1)}> {slot.name}
