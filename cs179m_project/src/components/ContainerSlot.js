@@ -2,9 +2,9 @@ import Slot from "../model/Slot.js"
 
 export default class ContainerSlot extends Slot {
 
-    constructor(dimensions, itemNumber, name){
+    constructor(dimensions, weight, name){
         super(dimensions)
-        this.itemNumber = itemNumber
+        this.weight = weight
         this.name = name
     }
 }

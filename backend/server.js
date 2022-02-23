@@ -26,26 +26,8 @@ next()
   res.sendStatus(200)
 });
 
-// app.post("/uploadfile", (req, res, next) => {
-//   // put the file in public/data folder and make sure data folder is empty
-//   var fileData = Object.keys(req.body)
-//   var fileContents = ""
-//   for(var line of fileData){
-//     fileContents += line
-//   } 
-//   fs.appendFile("../cs179m_project/public/data/manifest.txt", fileContents, err => {
-//     if(err) {
-//       console.log(err)
-//     }
-//   })
-// next()
-// }, function(req, res, next) {
-//   res.sendStatus(200)
-// });
-
 //For log after manifest is uploaded
 app.post("/manifestLogWrite", (req, res, next) => {
-  console.log("testing in axios post");
   fs.appendFile('../cs179m_project/Logs/log.txt', req.body.logData, err => {
     if (err) {
       console.error(err)
