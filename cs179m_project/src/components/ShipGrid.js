@@ -47,6 +47,8 @@ export default class ShipGrid extends React.Component {
     //     });
     // }
 
+
+
     getRowAndColumnSize(line){
         let dimensions = line.substring(1, 6).split(",")
         return [Number(dimensions[0]), Number(dimensions[1])]

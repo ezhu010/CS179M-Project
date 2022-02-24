@@ -278,6 +278,27 @@ export default class BalanceShipGrid extends React.Component {
         console.log(instructionsList);
     }
 
+    getShallowGrid(grid){
+        var res = []
+        for(var i = 0; i < grid.length; i++){
+            var temp = []
+            for(var j = 0; j < grid[i].length; j++){
+                if(grid[i][j] instanceof ContainerSlot){
+                    temp.push(Object.assign(new ContainerSlot([i,j], grid[i][j].weight, grid[i][j].name), grid[i][j]))
+                } 
+                if(grid[i][j] instanceof NaNSlot){
+                    temp.push(Object.assign(new NaNSlot([i,j]), grid[i][j]))
+                }
+                if(grid[i][j] instanceof UnusedSlot){
+                    temp.push(Object.assign(new UnusedSlot([i,j]), grid[i][j]))
+                }
+            
+            }
+            res.push(temp)
+        }
+        return res
+    }
+
     balanceShip(){
         console.log(this.state.useSift)
         if(!this.state.useSift){
@@ -286,7 +307,8 @@ export default class BalanceShipGrid extends React.Component {
         else{
             console.log("Balancing Ship")
             console.log(this.state.grid)
-            let currNode = new Node(this.state.grid)
+            var tempGrid = this.getShallowGrid(this.state.grid)
+            let currNode = new Node(tempGrid)
             currNode.generateAllChildren()
         }
     }
