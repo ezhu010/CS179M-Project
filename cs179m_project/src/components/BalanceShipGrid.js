@@ -14,6 +14,7 @@ import axios from 'axios';
 import React from "react";
 import "../styling/Slots.css"
 import Node from "../Balancing/Node"
+import BalanceSearch from "../Balancing/BalanceSearch"
 
 export default class BalanceShipGrid extends React.Component {
 
@@ -299,17 +300,25 @@ export default class BalanceShipGrid extends React.Component {
         return res
     }
 
+    getShallowAllContainers(allContainers){
+        let res = []
+        for(let container of allContainers){
+            res.push(Object.assign(new ContainerSlot([container.row,container.column], container.weight, container.name), container))
+        }
+        return res
+    }
+
     balanceShip(){
         console.log(this.state.useSift)
         if(!this.state.useSift){
             this.performSift()
         }  
         else{
-            console.log("Balancing Ship")
-            console.log(this.state.grid)
+            var allShallowContainer = this.getShallowAllContainers(this.state.allContainers)
             var tempGrid = this.getShallowGrid(this.state.grid)
-            let currNode = new Node(tempGrid)
-            currNode.generateAllChildren()
+            let balanceSearch = new BalanceSearch(tempGrid, allShallowContainer)
+            balanceSearch.greedySearch()
+
         }
     }
 
@@ -341,7 +350,7 @@ export default class BalanceShipGrid extends React.Component {
                                 top: `${this.state.CELLSIZE * (7 - slot.row) + 1}px`,
                                 width: `${this.state.CELLSIZE - 1}px`,
                                 height: `${this.state.CELLSIZE - 1}px`,
-                                }} key={(slot.row - 1) * 12 + (slot.column - 1)} id={(slot.row - 1) * 12 + (slot.column - 1)}>NAN
+                                }} key={(slot.row) * 12 + (slot.column)} id={(slot.row) * 12 + (slot.column)}>NAN
                             </div>
                         )
                     }
@@ -352,7 +361,7 @@ export default class BalanceShipGrid extends React.Component {
                                 top: `${this.state.CELLSIZE * (7 - slot.row) + 1}px`,
                                 width: `${this.state.CELLSIZE - 1}px`,
                                 height: `${this.state.CELLSIZE - 1}px`,
-                                }} key={(slot.row - 1) * 12 + (slot.column - 1)} id={(slot.row - 1) * 12 + (slot.column - 1)}> UNUSED
+                                }} key={(slot.row) * 12 + (slot.column)} id={(slot.row) * 12 + (slot.column)}> UNUSED
                             </div>
                         )       
                     }
@@ -365,7 +374,7 @@ export default class BalanceShipGrid extends React.Component {
                                         top: `${this.state.CELLSIZE * (7 - slot.row) + 1}px`,
                                         width: `${this.state.CELLSIZE - 1}px`,
                                         height: `${this.state.CELLSIZE - 1}px`,
-                                        }} key={(slot.row - 1) * 12 + (slot.column - 1)} id={(slot.row - 1) * 12 + (slot.column - 1)}> {slot.name}
+                                        }} key={(slot.row) * 12 + (slot.column)} id={(slot.row) * 12 + (slot.column)}> {slot.name}
                                 </div>
                             </ToolTip>
                         )

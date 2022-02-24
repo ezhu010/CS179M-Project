@@ -1,13 +1,13 @@
-
 import ContainerSlot from "../components/ContainerSlot"
 import UnusedSlot from "../components/UnusedSlot"
 import NaNSlot from "../components/NaNSlot"
 
 export default class Node {
     
-    constructor(grid){
+    constructor(grid, allContainers, cost = 0){
         this.grid = grid
-        this.allContainers = []
+        this.allContainers = allContainers;
+        this.cost = cost;
     }
 
     generateAllChildren() {
@@ -18,7 +18,6 @@ export default class Node {
                 res.push(colRes)
             }
         }
-        console.log(res)
         return res;
     }
 
@@ -28,7 +27,6 @@ export default class Node {
             var temp = []
             for(var j = 0; j < grid[i].length; j++){
                 if(grid[i][j] instanceof ContainerSlot){
-                    this.allContainers.push(Object.assign(new ContainerSlot([i,j], grid[i][j].weight, grid[i][j].name), grid[i][j]))
                     temp.push(Object.assign(new ContainerSlot([i,j], grid[i][j].weight, grid[i][j].name), grid[i][j]))
                 } 
                 if(grid[i][j] instanceof NaNSlot){
@@ -44,27 +42,30 @@ export default class Node {
         return res
     }
 
+    getShallowAllContainers(allContainers){
+        let res = []
+        for(let container of allContainers){
+             res.push(Object.assign(new ContainerSlot([container.row,container.column], container.weight, container.name), container))
+        }
+        return res
+    }
+
     generateChildrenColumn(col) {
         let res = []
         let [hiRow, hiCol] = this.highestContainerSlot(col)
-        console.log(hiRow, hiCol)
         if (hiRow == -1 && hiCol == -1) return -1
         for (let c = 0; c <= 11; ++c){
             if(c == col){
                 continue
             }
             let [lowRow, lowCol] = this.lowestUnusedSlot(c);
-            console.log(lowRow, lowCol)
             if(lowRow > 7) continue
-            //create new Node
             let tempGrid = this.getShallowGrid(this.grid)
-            console.log("before", this.grid)
-            let newNode = new Node(tempGrid)
+            let allShallowContainer = this.getShallowAllContainers(this.allContainers)
+            let newNode = new Node(tempGrid, allShallowContainer, this.cost + this.getManhattanDistance(hiRow, hiCol, lowRow, lowCol))
             newNode.swapSlots(newNode.grid[hiRow][hiCol], newNode.grid[lowRow][lowCol])
-            console.log("after", this.grid)
             res.push(newNode)
         }
-
         return res;
     }
 
@@ -88,45 +89,72 @@ export default class Node {
         return [row, col]
     }
 
-    swapSlots(s1, s2){ //s1: slot object
-        console.log("Swapping: ", s1, s2)
+    swapSlots(s1, s2){ //s1: container, s2: unused slot
         let tmpSlot = s1; 
         let s1Row = s1.row
         let s1Col = s1.column
+        let s2Row = s2.row
+        let s2Col = s2.column
         this.grid[s1.row][s1.column] = s2
         s1.column = s2.column
         s1.row = s2.row
         this.grid[s2.row][s2.column] = tmpSlot
         s2.column = s1Col
         s2.row = s1Row
+
+        //swap allContainers
+        let s1Container 
+        for (let container of this.allContainers){
+            if (container.row === s1Row && container.column === s1Col){
+                container.row = s2Row
+                container.column = s2Col
+                break
+            }
+        }
     }
 
     howBalanced(){
         var leftSide = this.getPortSideWeight()
         var rightSide = this.getStarboardSideWeight()
-        return Math.abs(leftSide - rightSide)
+        return Math.min(leftSide, rightSide) / Math.max(leftSide, rightSide)
     }
-
 
     getPortSideWeight(){
         //left side
         var res = 0;
-        for(let container of this.allContainers) {
-            if(container.column < 7) 
+        this.allContainers.forEach((container) => {
+            if (container.column < 6){
                 res += parseInt(container.weight)
-        }
+            }
+        });
         return res;
     }
+
     getStarboardSideWeight(){
         var res = 0;
-        for(let container of this.allContainers) {
-            if(container.column >= 7) 
+        this.allContainers.forEach((container) => {
+            if (container.column >= 6){
                 res += parseInt(container.weight)
-        }
+            }
+        });
         return res;
     }
 
-    // getManhattanDistance(root) {
+    getManhattanDistance(x1, y1, x2, y2) { //g(n)
+        var xDist = Math.abs(x1 - x2)
+        var yDist = Math.abs(y1 - y2)
+        return yDist + xDist 
+    }
 
-    // }
+    isEqualTo(node){
+        // console.log(JSON.stringify(node.grid[0][2]))
+        for (let i = 0; i < this.grid.length; ++i){
+            // console.log(i)
+            for (let j = 0; j < i.length; ++j){
+                // console.log(object)
+                if (JSON.stringify(Object.assign({}, this.grid[i][j])) !== JSON.stringify(Object.assign({}, node.grid[i][j]))) return false
+            }
+        }
+        return true
+    }
 }
