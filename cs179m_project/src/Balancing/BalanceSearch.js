@@ -9,9 +9,16 @@ export default class BalanceSearch {
     }
 
     greedySearch(){
+        var count = 0
         this.frontier.push(this.initialNode, 0)
         this.visited.push(this.initialNode)
         while(this.frontier.size > 0){
+            ++count
+            if (count % 50 === 0) {
+                console.log("frontier", this.frontier.size);
+                console.log("visited", this.visited.length);
+                console.log(count);
+            }
             let top = this.frontier.peek()
             if (top.howBalanced() >= 0.9) {
                 console.log("TOP: ", top)
@@ -19,20 +26,19 @@ export default class BalanceSearch {
             }
             this.frontier.pop() 
             var children = top.generateAllChildren()
-            // console.log("CHILDREN", children)
             for(let child of children){
                 for (let lilguy of child){
-                    if(!this.isFound(lilguy)){
+                    if(!this.isFoundInVisited(lilguy)){
                         this.frontier.push(lilguy, lilguy.cost) 
                         this.visited.push(lilguy)
-                        console.log("VISITED", this.visited)
                     }
                 }
             }
         }
     }
 
-    isFound(node) {
+    isFoundInVisited(node) {
+
         for(let obj of this.visited) {
             // check for equality here
             if (node.isEqualTo(obj)) return true

@@ -62,7 +62,7 @@ export default class Node {
             if(lowRow > 7) continue
             let tempGrid = this.getShallowGrid(this.grid)
             let allShallowContainer = this.getShallowAllContainers(this.allContainers)
-            let newNode = new Node(tempGrid, allShallowContainer, this.cost + this.getManhattanDistance(hiRow, hiCol, lowRow, lowCol))
+            let newNode = new Node(tempGrid, allShallowContainer, (this.cost + this.getManhattanDistance(hiRow, hiCol, lowRow, lowCol)))
             newNode.swapSlots(newNode.grid[hiRow][hiCol], newNode.grid[lowRow][lowCol])
             res.push(newNode)
         }
@@ -119,6 +119,8 @@ export default class Node {
         return Math.min(leftSide, rightSide) / Math.max(leftSide, rightSide)
     }
 
+    // howBalanced / cost
+
     getPortSideWeight(){
         //left side
         var res = 0;
@@ -147,12 +149,9 @@ export default class Node {
     }
 
     isEqualTo(node){
-        // console.log(JSON.stringify(node.grid[0][2]))
         for (let i = 0; i < this.grid.length; ++i){
-            // console.log(i)
-            for (let j = 0; j < i.length; ++j){
-                // console.log(object)
-                if (JSON.stringify(Object.assign({}, this.grid[i][j])) !== JSON.stringify(Object.assign({}, node.grid[i][j]))) return false
+            for (let j = 0; j < this.grid[i].length; ++j){
+                if (JSON.stringify(this.grid[i][j]) !== JSON.stringify(node.grid[i][j])) return false
             }
         }
         return true
