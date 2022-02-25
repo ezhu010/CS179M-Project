@@ -21,7 +21,7 @@ export default class BalanceSearch {
             }
             let top = this.frontier.peek()
             if (top.howBalanced() >= 0.9) {
-                console.log("TOP: ", top)
+                top.traceBackRoot();
                 return top
             }
             this.frontier.pop() 

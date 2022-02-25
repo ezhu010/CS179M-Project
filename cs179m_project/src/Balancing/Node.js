@@ -4,10 +4,11 @@ import NaNSlot from "../components/NaNSlot"
 
 export default class Node {
     
-    constructor(grid, allContainers, cost = 0){
+    constructor(grid, allContainers, cost = 0, root = null){
         this.grid = grid
         this.allContainers = allContainers;
         this.cost = cost;
+        this.root = root;
     }
 
     generateAllChildren() {
@@ -62,7 +63,7 @@ export default class Node {
             if(lowRow > 7) continue
             let tempGrid = this.getShallowGrid(this.grid)
             let allShallowContainer = this.getShallowAllContainers(this.allContainers)
-            let newNode = new Node(tempGrid, allShallowContainer, (this.cost + this.getManhattanDistance(hiRow, hiCol, lowRow, lowCol)))
+            let newNode = new Node(tempGrid, allShallowContainer, (this.cost + this.getManhattanDistance(hiRow, hiCol, lowRow, lowCol)), this)
             newNode.swapSlots(newNode.grid[hiRow][hiCol], newNode.grid[lowRow][lowCol])
             res.push(newNode)
         }
@@ -155,5 +156,51 @@ export default class Node {
             }
         }
         return true
+    }
+
+    findRouteFromRoot() {
+        let node = this;
+        let res = [];
+        while(node.root != null) {
+            res.push(node)
+            node = node.root
+        }
+        res.push(node)
+        res = res.reverse()
+        return res;
+    }
+
+    traceBackRoot() {
+        let route = this.findRouteFromRoot()
+        let craneX = 9, craneY = 1;
+        for(let i = 0; i < route.length  - 1; i++) {
+            let contianerMoved = route[i].findContainerMoved(route[i + 1])
+            // crane movement
+            if(craneX !== contianerMoved[0].row  + 1 || craneY !== contianerMoved[0].column + 1)
+            console.log("Move crane from [", craneX, ", ", craneY,
+             "] to [", contianerMoved[0].row  + 1, ", ", contianerMoved[0].column + 1, "]")
+            // container movement
+            console.log("Move container ", contianerMoved[0].name, 
+            " from [", contianerMoved[0].row + 1, ", ", contianerMoved[0].column + 1, "] to [", 
+            contianerMoved[1].row + 1, ", ", contianerMoved[1].column + 1, "]")
+            craneX = contianerMoved[1].row + 1;
+            craneY = contianerMoved[1].column + 1;
+        }
+        // Reset crane position at the end
+        console.log("Move crane from [", craneX, ", ", craneY,
+             "] to [ 9 , 1 ]")
+    }
+
+
+
+    findContainerMoved(child) {
+        for(let i = 0; i < this.allContainers.length; i++) {
+            for(let j = 0; j < child.allContainers.length; j++)
+            if(child.allContainers[j].name === this.allContainers[i].name) {
+                if(child.allContainers[j].column !== this.allContainers[i].column 
+                    || child.allContainers[j].row !== this.allContainers[i].row )
+                        return [this.allContainers[i], child.allContainers[j]]
+            } 
+        }
     }
 }

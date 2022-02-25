@@ -309,7 +309,6 @@ export default class BalanceShipGrid extends React.Component {
     }
 
     balanceShip(){
-        console.log(this.state.useSift)
         if(!this.state.useSift){
             this.performSift()
         }  

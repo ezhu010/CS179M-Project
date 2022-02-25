@@ -56,7 +56,6 @@ export default class ShipGrid extends React.Component {
 
     populateGridFromCSV() {
         // let csvData = await this.fetchCsv();
-        console.log("testing")
         let csvData = this.state.manifestData;
         csvData = csvData.split("\n") 
         let dimensions = this.getRowAndColumnSize(csvData.at(csvData.length - 1))
