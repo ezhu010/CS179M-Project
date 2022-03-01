@@ -10,18 +10,25 @@ export default class BalanceSearch {
 
     greedySearch(){
         var count = 0
-        this.frontier.push(this.initialNode, 0)
+        this.frontier.push(this.initialNode, this.initialNode.computeHeuristic())
         this.visited.push(this.initialNode)
         while(this.frontier.size > 0){
             ++count
+
+            let top = this.frontier.peek()
+            
             if (count % 50 === 0) {
                 console.log("frontier", this.frontier.size);
                 console.log("visited", this.visited.length);
+                console.log("balance %", top.howBalanced());
                 console.log(count);
             }
-            let top = this.frontier.peek()
+            
             if (top.howBalanced() >= 0.9) {
                 top.traceBackRoot();
+                top.returnCranePos()
+                console.log("TOP:", top)
+                console.log(top.computeHeuristic())
                 return top
             }
             this.frontier.pop() 
@@ -29,7 +36,7 @@ export default class BalanceSearch {
             for(let child of children){
                 for (let lilguy of child){
                     if(!this.isFoundInVisited(lilguy)){
-                        this.frontier.push(lilguy, lilguy.cost) 
+                        this.frontier.push(lilguy, lilguy.cost + lilguy.computeHeuristic()) 
                         this.visited.push(lilguy)
                     }
                 }

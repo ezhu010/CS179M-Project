@@ -4,11 +4,12 @@ import NaNSlot from "../components/NaNSlot"
 
 export default class Node {
     
-    constructor(grid, allContainers, cost = 0, root = null){
+    constructor(grid, allContainers, cost = 0, root = null, cranePos = [8, 0]){
         this.grid = grid
         this.allContainers = allContainers;
         this.cost = cost;
         this.root = root;
+        this.cranePos = cranePos
     }
 
     generateAllChildren() {
@@ -54,6 +55,7 @@ export default class Node {
     generateChildrenColumn(col) {
         let res = []
         let [hiRow, hiCol] = this.highestContainerSlot(col)
+        // console.log(hiRow, " ", hiCol);
         if (hiRow == -1 && hiCol == -1) return -1
         for (let c = 0; c <= 11; ++c){
             if(c == col){
@@ -63,7 +65,7 @@ export default class Node {
             if(lowRow > 7) continue
             let tempGrid = this.getShallowGrid(this.grid)
             let allShallowContainer = this.getShallowAllContainers(this.allContainers)
-            let newNode = new Node(tempGrid, allShallowContainer, (this.cost + this.getManhattanDistance(hiRow, hiCol, lowRow, lowCol)), this)
+            let newNode = new Node(tempGrid, allShallowContainer, this.cost + this.getManhattanDistance(this.cranePos[0], this.cranePos[1], hiRow, hiCol) + this.getManhattanDistance(hiRow, hiCol, lowRow, lowCol), this, [lowRow, lowCol])
             newNode.swapSlots(newNode.grid[hiRow][hiCol], newNode.grid[lowRow][lowCol])
             res.push(newNode)
         }
@@ -71,12 +73,14 @@ export default class Node {
     }
 
     highestContainerSlot(col){
-        let row = -1;
-        while ((row + 1) < 8 && this.grid[row + 1][col] instanceof ContainerSlot){
+        var row = -1;
+        var foundContainer = false
+        while ((row + 1) < 8 && !(this.grid[row + 1][col] instanceof UnusedSlot)){
+            if (this.grid[row + 1][col] instanceof ContainerSlot) foundContainer = true
             ++row
         }
 
-        if(row === -1)
+        if(row === -1 || foundContainer === false)
             return [-1, -1]
 
         return [row, col]
@@ -191,8 +195,6 @@ export default class Node {
              "] to [ 9 , 1 ]")
     }
 
-
-
     findContainerMoved(child) {
         for(let i = 0; i < this.allContainers.length; i++) {
             for(let j = 0; j < child.allContainers.length; j++)
@@ -202,5 +204,29 @@ export default class Node {
                         return [this.allContainers[i], child.allContainers[j]]
             } 
         }
+    }
+
+    returnCranePos(){
+        this.cost += this.getManhattanDistance(this.cranePos[0], this.cranePos[1], 8, 0)
+        this.cranePos = [8, 0]
+    }
+
+    
+    computeHeuristic(){
+        var count = 0;
+        var leftSide = this.getPortSideWeight()
+        var rightSide = this.getStarboardSideWeight()
+        var balanceMass = (leftSide + rightSide) / 2.0;
+        var diff = (balanceMass - Math.min(leftSide, rightSide)) // (x/y) = (x+ y)).9
+        // sort containers of left side by mass
+        // list.sort((a, b) => (a.color > b.color) ? 1 : -1)
+        var containersSorted = this.allContainers.filter(a => a.column <= 5).sort((a, b) => b.weight - a.weight)
+        let i = 0;
+        while(diff >= 0 && i < containersSorted.length) {
+            diff -= containersSorted[i];
+            i++;
+            count++;
+        }
+        return count;
     }
 }
