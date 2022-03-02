@@ -156,7 +156,9 @@ export default class Node {
     isEqualTo(node){
         for (let i = 0; i < this.grid.length; ++i){
             for (let j = 0; j < this.grid[i].length; ++j){
-                if (JSON.stringify(this.grid[i][j]) !== JSON.stringify(node.grid[i][j])) return false
+                if (JSON.stringify(this.grid[i][j]) !== JSON.stringify(node.grid[i][j])){
+                    return false
+                }
             }
         }
         return true
@@ -210,7 +212,6 @@ export default class Node {
         this.cost += this.getManhattanDistance(this.cranePos[0], this.cranePos[1], 8, 0)
         this.cranePos = [8, 0]
     }
-
     
     computeHeuristic(){
         var count = 0;
@@ -228,5 +229,33 @@ export default class Node {
             count++;
         }
         return count;
+    }
+
+    getContainerCoord(goalState, container){
+
+        for (let i = 0; i < goalState.grid.length; ++i){
+            for (let j = 0; j < goalState.grid[i].length; ++j){
+                console.log(JSON.stringify(goalState.grid[i][j]), JSON.stringify(container))
+                if (JSON.stringify(goalState.grid[i][j]) == JSON.stringify(container)){
+                        console.log("testing here")
+                        return [i,j]
+                }
+            }
+        }
+        console.log("Should not get here")
+        return [-1, -1]
+    }
+    
+    computeSiftHeuristic(goalState){
+        var res = 0;
+        for(var i = 0; i < this.allContainers.length; i++){
+            var [x,y] = this.getContainerCoord(goalState, this.allContainers[i]);
+            console.log(x,y);
+            if (x !== -1 && y !== -1){
+                res += this.getManhattanDistance(x, y, this.allContainers[i].row, this.allContainers[i].column)
+            }
+        }
+        console.log(res);
+        return res;
     }
 }

@@ -15,6 +15,8 @@ import React from "react";
 import "../styling/Slots.css"
 import Node from "../Balancing/Node"
 import BalanceSearch from "../Balancing/BalanceSearch"
+import Sift from "../Balancing/Sift"
+
 
 export default class BalanceShipGrid extends React.Component {
 
@@ -220,13 +222,12 @@ export default class BalanceShipGrid extends React.Component {
     }
 
     performSift(){
-        console.log("performing sift")
         // console.log(this.state.allContainers)
         // 1. sort the container list by weight
         let sortedList = []
         sortedList = this.state.allContainers.sort((a, b) => parseInt(b.weight) - parseInt(a.weight))
-        console.log(sortedList)
-        console.log(this.state.grid)
+        // console.log(sortedList)
+        // console.log(this.state.grid)
         var instructionsList = [] // [{startPos: [1,6], endPos:[1,6]}    ]
         let leftSidePtr = [1, 6]
         let rightSidePtr = [1, 7]
@@ -272,11 +273,52 @@ export default class BalanceShipGrid extends React.Component {
                 else
                     rightSidePtr[1]++
             }
-            instructionsList.push({"startPos": startPos, "endPos": endPos, "containerName": sortedList[i].name })
+            instructionsList.push({"startPos": startPos, "endPos": endPos, "containerName": sortedList[i].name, "grid": this.state.grid, "weight": sortedList[i].weight })
         }
-        console.log(leftSidePtr);
-        console.log(rightSidePtr);
-        console.log(instructionsList);
+        // console.log(instructionsList)
+        var siftGrid = this.getEmptySiftGrid(this.state.grid)
+        // populate all containers list
+        var siftAllContainers = []
+        for(var i = 0; i < instructionsList.length; i++) {
+            let item = instructionsList[i]
+            // console.log(item);
+            let newCnt = new ContainerSlot([item.endPos[0] - 1, item.endPos[1] - 1], item.weight, item.containerName)
+            siftAllContainers.push(newCnt)
+        }
+        // loop through instruction list and populate siftGrid
+        
+        
+        for(var i = 0; i < instructionsList.length; i++){
+            let item = instructionsList[i]
+            // siftGrid[item.endPos[0]][item.endPos[1]] = {}
+            siftGrid[item.endPos[0] - 1][item.endPos[1] - 1] = new ContainerSlot([item.endPos[0] - 1, item.endPos[1] - 1], item.weight, item.containerName)
+        }
+
+        let SIFT = new Sift(this.state.grid, siftGrid, this.state.allContainers, siftAllContainers)
+        SIFT.performSiftSearch()
+
+    }
+
+    getEmptySiftGrid(grid){
+        var res = []
+        for(var i = 0; i < grid.length; i++){
+            var temp = []
+            for(var j = 0; j < grid[i].length; j++){
+                if(grid[i][j] instanceof ContainerSlot){
+                    temp.push(Object.assign(new UnusedSlot([i,j])))
+                } 
+                if(grid[i][j] instanceof NaNSlot){
+                    temp.push(Object.assign(new NaNSlot([i,j]), grid[i][j]))
+                }
+                if(grid[i][j] instanceof UnusedSlot){
+                    temp.push(Object.assign(new UnusedSlot([i,j])))
+                }
+            
+            }
+            res.push(temp)
+        }
+        console.log("empty grid", res)
+        return res
     }
 
     getShallowGrid(grid){
