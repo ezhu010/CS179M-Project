@@ -9,13 +9,15 @@ import RemoveContainerList from "./RemoveContainerList.js";
 import AddContainerList from "./AddContainerList";
 import ManifestUpload from "./ManifestUpload.js";
 import axios from 'axios';
-// import  from "./NaNSlot.js"
 
 import React from "react";
 import "../styling/Slots.css"
 import Node from "../Balancing/Node"
 import BalanceSearch from "../Balancing/BalanceSearch"
 import Sift from "../Balancing/Sift"
+import Modal from '@mui/material/Modal';
+import DownloadLink from "react-download-link";
+
 
 
 export default class BalanceShipGrid extends React.Component {
@@ -35,8 +37,23 @@ export default class BalanceShipGrid extends React.Component {
             isfileUploaded: false,
             manifestName: "",
             isShipBalanced: true, 
-            useSift: false
+            useSift: false,
+            downloadReady: false,
+            showRoute: false, 
+            route: "",
+            open: false,
+            manifestDataNew: ""
         }
+        this.handleOpen = this.handleOpen.bind(this);
+        this.handleClose = this.handleClose.bind(this);
+    }
+
+    handleClose(){
+        this.setState({open: false})
+    }
+
+    handleOpen(){
+        this.setState({open: true})
     }
 
     componentWillMount() {
@@ -293,12 +310,16 @@ export default class BalanceShipGrid extends React.Component {
             // siftGrid[item.endPos[0]][item.endPos[1]] = {}
             siftGrid[item.endPos[0] - 1][item.endPos[1] - 1] = new ContainerSlot([item.endPos[0] - 1, item.endPos[1] - 1], item.weight, item.containerName)
         }
-
         let SIFT = new Sift(this.state.grid, siftGrid, this.state.allContainers, siftAllContainers)
-        SIFT.performSiftSearch()
-
+        let [top, route] = SIFT.performSiftSearch()
+        // top is the goal state, rerender top
+        console.log("top", top.grid);
+        this.setState({route: route})
+        this.setState({grid: top.grid})
+        this.setState({downloadReady: true})
+        this.setState({showRoute: true})
+        this.handleDownload(top.grid)
     }
-
     getEmptySiftGrid(grid){
         var res = []
         for(var i = 0; i < grid.length; i++){
@@ -358,16 +379,96 @@ export default class BalanceShipGrid extends React.Component {
             var allShallowContainer = this.getShallowAllContainers(this.state.allContainers)
             var tempGrid = this.getShallowGrid(this.state.grid)
             let balanceSearch = new BalanceSearch(tempGrid, allShallowContainer)
-            balanceSearch.greedySearch()
-
+            let [top, route] = balanceSearch.greedySearch()
+            console.log(top.grid)
+            this.setState({downloadReady: true})
+            this.setState({showRoute: true})
+            this.handleDownload(top.grid)
         }
+    }
+    
+    getColumnNumber(column){
+        if(column < 10){
+            return "0" + column
+        }
+        else{
+            return column
+        }
+    }
+
+    getContainerType(container){
+        if(container instanceof NaNSlot){
+            return "NAN"
+        }
+        else if(container instanceof UnusedSlot){
+            return "UNUSED"
+        }
+        else{
+            return container.name
+        }
+    }
+
+    getWeight(weight){
+        if(weight == undefined){
+            return "00000"
+        }
+        else{
+            return weight
+        }
+    }
+
+    handleDownload(grid){
+        console.log(grid)
+        var res = ""
+        for(var i = 0; i < grid.length; i++) {
+            for(var j = 0;  j < grid[0].length; j++) {
+                res += "[" +  "0" + (grid[i][j].row + 1).toString() + "," + this.getColumnNumber(grid[i][j].column + 1) +
+                "], {" + this.getWeight(grid[i][j].weight)+ "}, " + this.getContainerType(grid[i][j]) + "\n"
+            }
+        }
+
+        var jsonData = {
+            manifestDataNew: res,
+            manifestName: this.state.manifestName,
+        }
+        this.setState({manifestDataNew: res})
+        // axios
+        // .post('http://localhost:8080/manifestDownload', jsonData)
+        // .then((res) => { 
+        //     if(res.status == 200){
+        //         window.location.reload(false);
+        //         console.log("success")
+        //     }
+        // })
+        // .catch(err => {
+        //     console.error(err);
+        //     return
+        // });
+    }
+
+    showInstruction(){
+        this.handleOpen()
     }
 
     render() {
         return(
         <div className="maingrid">  
 
+        <Modal
+            open={this.state.open}
+            onClose={this.handleClose}
+            aria-labelledby="modal-modal-title"
+            aria-describedby="modal-modal-description"
+            // style={{ alignItems: "center", justifyContent: "center" }}
+        >
+            <h1 className="instructionsList">{this.state.route}</h1>
+            {/* {this.state.route.map(instruction => {
+                <h1> {instruction}</h1>
+            })} */}
+        </Modal>
+
         <ManifestUpload sendManifestData={(logData, manifestFileName) => {
+            console.log("testing")
                 localStorage.clear()
                 localStorage["slots"] = JSON.stringify([])
                 localStorage["addContainers"] = JSON.stringify([])
@@ -423,6 +524,17 @@ export default class BalanceShipGrid extends React.Component {
                 })
             ) : null
         } 
+        {this.state.downloadReady ? 
+            <DownloadLink
+                className="downloadButton"
+                label="Save"
+                filename= {this.state.manifestName.substring(0, this.state.manifestName.length - 4) + "_OUTBOUND.txt"}
+                exportFile={() => this.state.manifestDataNew}
+                    />:null}
+        {/* {this.state.downloadReady ? <a href='../../../backend/finalManifest/test.txt' className="downloadButton" download>Click to download</a>: null} */}
+
+        {this.state.showRoute ? <button onClick={() => {this.showInstruction()}} className="showInstructionButton">Show Instructions</button>: null}
+        {/* {this.state.downloadReady ? <button onClick={() => {this.handleDownload()}} className="downloadButton">{"download"}</button>: null} */}
         {!this.state.isShipBalanced ? <button onClick={() => {this.balanceShip()}} className="balanceButton">{!this.state.useSift ? "SIFT" : "Balance Ship"}</button>: null}
         <button className="performAlgorithm" onClick={() => {
             this.isBalanced()

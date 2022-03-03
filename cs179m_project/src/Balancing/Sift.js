@@ -23,12 +23,11 @@ export default class Sift {
             }
             this.frontier.pop() 
             if (top.isEqualTo(this.goalState)){
-                top.traceBackRoot()
+                let route = top.traceBackRoot()
                 top.returnCranePos()
                 console.log("TOP: ", top);
-                return top
+                return [top, route]
             }
-            break;
             var children = top.generateAllChildren()
             for(let child of children){
                 for (let lilguy of child){

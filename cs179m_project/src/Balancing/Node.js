@@ -32,10 +32,10 @@ export default class Node {
                     temp.push(Object.assign(new ContainerSlot([i,j], grid[i][j].weight, grid[i][j].name), grid[i][j]))
                 } 
                 if(grid[i][j] instanceof NaNSlot){
-                    temp.push(Object.assign(new NaNSlot([i,j]), grid[i][j]))
+                    temp.push(Object.assign(new NaNSlot([i,j])))
                 }
                 if(grid[i][j] instanceof UnusedSlot){
-                    temp.push(Object.assign(new UnusedSlot([i,j]), grid[i][j]))
+                    temp.push(Object.assign(new UnusedSlot([i,j])))
                 }
             
             }
@@ -179,22 +179,24 @@ export default class Node {
     traceBackRoot() {
         let route = this.findRouteFromRoot()
         let craneX = 9, craneY = 1;
+        var res = []
         for(let i = 0; i < route.length  - 1; i++) {
             let contianerMoved = route[i].findContainerMoved(route[i + 1])
             // crane movement
             if(craneX !== contianerMoved[0].row  + 1 || craneY !== contianerMoved[0].column + 1)
-            console.log("Move crane from [", craneX, ", ", craneY,
-             "] to [", contianerMoved[0].row  + 1, ", ", contianerMoved[0].column + 1, "]")
+            res.push("Move crane from ["+ craneX +", " + craneY +
+             "] to ["+ contianerMoved[0].row  + 1 + ", " + contianerMoved[0].column + 1 +  "]")
             // container movement
-            console.log("Move container ", contianerMoved[0].name, 
-            " from [", contianerMoved[0].row + 1, ", ", contianerMoved[0].column + 1, "] to [", 
-            contianerMoved[1].row + 1, ", ", contianerMoved[1].column + 1, "]")
+            res.push("Move container " + contianerMoved[0].name +  
+            " from [" + contianerMoved[0].row + 1 + ", " + contianerMoved[0].column + 1 + "] to [" +
+            contianerMoved[1].row + 1 + ", " + contianerMoved[1].column + 1 + "]")
             craneX = contianerMoved[1].row + 1;
             craneY = contianerMoved[1].column + 1;
         }
         // Reset crane position at the end
-        console.log("Move crane from [", craneX, ", ", craneY,
+        res.push("Move crane from [" + craneX +  ", " + craneY + 
              "] to [ 9 , 1 ]")
+        return res
     }
 
     findContainerMoved(child) {
@@ -232,12 +234,9 @@ export default class Node {
     }
 
     getContainerCoord(goalState, container){
-
         for (let i = 0; i < goalState.grid.length; ++i){
             for (let j = 0; j < goalState.grid[i].length; ++j){
-                console.log(JSON.stringify(goalState.grid[i][j]), JSON.stringify(container))
-                if (JSON.stringify(goalState.grid[i][j]) == JSON.stringify(container)){
-                        console.log("testing here")
+                if (goalState.grid[i][j].name == container.name){
                         return [i,j]
                 }
             }
@@ -250,7 +249,7 @@ export default class Node {
         var res = 0;
         for(var i = 0; i < this.allContainers.length; i++){
             var [x,y] = this.getContainerCoord(goalState, this.allContainers[i]);
-            console.log(x,y);
+            // console.log(x,y);
             if (x !== -1 && y !== -1){
                 res += this.getManhattanDistance(x, y, this.allContainers[i].row, this.allContainers[i].column)
             }

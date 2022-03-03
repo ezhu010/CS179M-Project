@@ -21,7 +21,7 @@ export default class ManifestUpload extends Component {
     
     // On file select (from the pop up)
     onFileChange = event => {
-      event.preventDefault()
+      // event.preventDefault()
       console.log(event.target.files[0].name)
       this.props.sendManifestName(event.target.files[0].name)
       this.getBase64(event.target.files[0]).then(
@@ -32,23 +32,23 @@ export default class ManifestUpload extends Component {
     };
     
     // On file upload (click the upload button)
-    onFileUpload = (event) => {
-    event.preventDefault()
-    console.log(event)
-      const formData = new FormData();
+    // onFileUpload = (event) => {
+    // // event.preventDefault()
+    // console.log(event)
+    //   const formData = new FormData();
      
-      console.log(JSON.stringify(this.state.selectedFile));
-      console.log(formData)
-      axios.post("http://localhost:8080/uploadfile", this.state.selectedFile).then((res) => { 
-            if(res.status == 200){
-                this.props.checkUpload()
-            }
-      })
-            .catch(err => {
-                console.error(err);
-                return
-        });
-    };
+    //   console.log(JSON.stringify(this.state.selectedFile));
+    //   console.log(formData)
+    //   axios.post("http://localhost:8080/uploadfile", this.state.selectedFile).then((res) => { 
+    //         if(res.status == 200){
+    //             this.props.checkUpload()
+    //         }
+    //   })
+    //         .catch(err => {
+    //             console.error(err);
+    //             return
+    //     });
+    // };
     
     render() {
       return (

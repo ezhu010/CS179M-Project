@@ -25,11 +25,11 @@ export default class BalanceSearch {
             }
             
             if (top.howBalanced() >= 0.9) {
-                top.traceBackRoot();
+                var route = top.traceBackRoot();
                 top.returnCranePos()
                 console.log("TOP:", top)
                 console.log(top.computeHeuristic())
-                return top
+                return [top, route];
             }
             this.frontier.pop() 
             var children = top.generateAllChildren()
