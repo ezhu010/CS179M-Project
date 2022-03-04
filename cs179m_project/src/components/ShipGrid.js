@@ -10,6 +10,7 @@ import AddContainerList from "./AddContainerList";
 import ManifestUpload from "./ManifestUpload.js";
 import axios from 'axios';
 // import  from "./NaNSlot.js"
+import TransferSearch from "../Transfer/TransferSearch.js";
 
 import React from "react";
 import "../styling/Slots.css"
@@ -29,6 +30,7 @@ export default class ShipGrid extends React.Component {
             showGrid: false,
             isfileUploaded: false,
             manifestName: "",
+            allContainers: [],
         }
     }
 
@@ -36,17 +38,6 @@ export default class ShipGrid extends React.Component {
         localStorage["slots"] = JSON.stringify([])
         localStorage["addContainers"] = JSON.stringify([])
     }
-
-    // fetchCsv() {
-    //     return fetch('/data/manifest.txt').then(function (response) {
-    //         let reader = response.body.getReader();
-    //         let decoder = new TextDecoder('utf-8');
-    //         return reader.read().then(function (result) {
-    //             return decoder.decode(result.value);
-    //         });
-    //     });
-    // }
-
 
 
     getRowAndColumnSize(line){
@@ -82,6 +73,7 @@ export default class ShipGrid extends React.Component {
                 tmp.push(new UnusedSlot(this.getRowAndColumnSize(line[0])))
             } 
             else{
+                this.setState({allContainers: [...this.state.allContainers,  new ContainerSlot(this.getRowAndColumnSize(line[0]), line[1].substring(1,6), containerType)]})
                 tmp.push(new ContainerSlot(this.getRowAndColumnSize(line[0]), line[1].substring(1,6), containerType))
                 ++containerCount    
             }          
@@ -94,7 +86,6 @@ export default class ShipGrid extends React.Component {
                 tmp = []
             }
         })
-            console.log(this.state.manifestName)
             var sendData = `Manifest ${this.state.manifestName} is opened, there are ${containerCount} containers on the ship\n`
             var manifestInfo = {}
             manifestInfo.logData = sendData        
@@ -138,7 +129,40 @@ export default class ShipGrid extends React.Component {
         }
     }
 
-    performAlgorithm(){
+    getShallowGrid(grid){
+        var res = []
+        for(var i = 0; i < grid.length; i++){
+            var temp = []
+            for(var j = 0; j < grid[i].length; j++){
+                if(grid[i][j] instanceof ContainerSlot){
+                    temp.push(Object.assign(new ContainerSlot([i,j], grid[i][j].weight, grid[i][j].name), grid[i][j]))
+                } 
+                if(grid[i][j] instanceof NaNSlot){
+                    temp.push(Object.assign(new NaNSlot([i,j]), grid[i][j]))
+                }
+                if(grid[i][j] instanceof UnusedSlot){
+                    temp.push(Object.assign(new UnusedSlot([i,j]), grid[i][j]))
+                }
+            
+            }
+            res.push(temp)
+        }
+        return res
+    }
+    getShallowAllContainers(allContainers){
+        let res = []
+        for(let container of allContainers){
+            res.push(Object.assign(new ContainerSlot([container.row,container.column], container.weight, container.name), container))
+        }
+        return res
+    }
+    performTransfer(){
+        var offLoadContainers = this.getShallowAllContainers(localStorage.getItem("slots"))
+        var onLoadContainers = [] //this.getShallowAllContainers(localStorage.getItem("addContainer"))
+        var tempGrid = this.getShallowGrid(this.state.grid)
+        var tempAllContainers = this.getShallowAllContainers(this.state.allContainers)
+        let transferSearch = new TransferSearch(tempGrid, tempAllContainers, offLoadContainers, onLoadContainers)
+        transferSearch.greedySearch();
         console.log("testing")
     }
 
@@ -207,7 +231,7 @@ export default class ShipGrid extends React.Component {
         <RemoveContainerList clickedContainer={this.state.clickedContainer} isfileUploaded={this.state.isfileUploaded}/>
         <AddContainerList isfileUploaded={this.state.isfileUploaded}/>
         <button className="performAlgorithm" onClick={() => {
-            this.performAlgorithm()
+            this.performTransfer()
         }}>Perform Offload/Onload</button>
         <Link to="/balanceShip">
          <button className="balance">Balancing</button>

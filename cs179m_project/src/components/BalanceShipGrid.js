@@ -432,18 +432,7 @@ export default class BalanceShipGrid extends React.Component {
             manifestName: this.state.manifestName,
         }
         this.setState({manifestDataNew: res})
-        // axios
-        // .post('http://localhost:8080/manifestDownload', jsonData)
-        // .then((res) => { 
-        //     if(res.status == 200){
-        //         window.location.reload(false);
-        //         console.log("success")
-        //     }
-        // })
-        // .catch(err => {
-        //     console.error(err);
-        //     return
-        // });
+ 
     }
 
     showInstruction(){
