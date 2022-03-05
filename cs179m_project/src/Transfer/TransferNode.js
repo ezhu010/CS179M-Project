@@ -80,12 +80,13 @@ export default class TransferNode {
         let tempGrid = this.getShallowGrid(this.grid)
         let tempTruckList = this.getShallowAllContainers(this.truckList)
         let tempAllContainers = this.getShallowAllContainers(this.allContainers)
-        tempAllContainers.filter(container => {
+        tempAllContainers = tempAllContainers.filter(container => {
             return container.row !== hiRow && container.column !== hiCol
         })
         tempTruckList.push(tempGrid[hiRow][hiCol])
         tempGrid[hiRow][hiCol] = new UnusedSlot([hiRow, hiCol])
-        let newTruckNode = new TransferNode(tempGrid, tempAllContainers, this.cost + (this.getManhattanDistance(this.cranePos[0], this.cranePos[1], hiRow, hiCol) * 2) + 15, tempTruckList, this, [8, 0])
+        let cost = this.cost + this.getManhattanDistance(this.cranePos[0], this.cranePos[1], hiRow, hiCol) + this.getManhattanDistance(8, 0, hiRow, hiCol) + 15
+        let newTruckNode = new TransferNode(tempGrid, tempAllContainers, cost, tempTruckList, this, [8, 0])
         return newTruckNode;
     }
     
@@ -204,21 +205,32 @@ export default class TransferNode {
         let craneX = 9, craneY = 1;
         var res = []
         for(let i = 0; i < route.length  - 1; i++) {
-            let contianerMoved = route[i].findContainerMoved(route[i + 1])
-            console.log("cnt moved: ", contianerMoved)
-            // crane movement
-            if(craneX !== contianerMoved[0].row  + 1 || craneY !== contianerMoved[0].column + 1)
-            res.push("Move crane from ["+ craneX +", " + craneY +
-             "] to ["+ contianerMoved[0].row  + 1 + ", " + contianerMoved[0].column + 1 +  "]")
-            // container movement
-            res.push("Move container " + contianerMoved[0].name +  
-            " from [" + contianerMoved[0].row + 1 + ", " + contianerMoved[0].column + 1 + "] to [" +
-            contianerMoved[1].row + 1 + ", " + contianerMoved[1].column + 1 + "]")
-            craneX = contianerMoved[1].row + 1;
-            craneY = contianerMoved[1].column + 1;
+            if(route[i].allContainers.length > route[i + 1].allContainers.length) {
+                // moved container from ship to truck
+                console.log("moved container from ship to truck ", route[i].allContainers, route[i + 1].allContainers)
+                let contianerRemoved = route[i].findContainerRemoved(route[i + 1])
+
+            }
+            else if(route[i].allContainers.length > route[i + 1].allContainers.length) {
+                // moved container from truck to ship
+            }
+            else {
+                let contianerMoved = route[i].findContainerMoved(route[i + 1])
+                // crane movement
+                if(craneX !== contianerMoved[0].row  + 1 || craneY !== contianerMoved[0].column + 1)
+                res.push("Move crane from ["+ craneX +", " + craneY +
+                "] to ["+ contianerMoved[0].row  + 1 + ", " + contianerMoved[0].column + 1 +  "]")
+                // container movement
+                res.push("Move container " + contianerMoved[0].name +  
+                " from [" + contianerMoved[0].row + 1 + ", " + contianerMoved[0].column + 1 + "] to [" +
+                contianerMoved[1].row + 1 + ", " + contianerMoved[1].column + 1 + "]")
+                craneX = contianerMoved[1].row + 1;
+                craneY = contianerMoved[1].column + 1;
+            }
         }
         // Reset crane position at the end
-        res.push("Move crane from [" + craneX +  ", " + craneY + 
+        if(craneX !== 9 && craneY !== 1)
+            res.push("Move crane from [" + craneX +  ", " + craneY + 
              "] to [ 9 , 1 ]")
         return res
     }
@@ -234,7 +246,16 @@ export default class TransferNode {
                         return [this.allContainers[i], child.allContainers[j]]
             } 
         }
-        // we have moved the container off the ship
+    }
+
+    findContainerRemoved(child) {
+        let i = 0;
+        let res = [];
+        for(i = 0; i < this.allContainers.length; i++) {
+            for(let j = 0; j < this.allContainers.length; j++) {
+                
+            }
+        }
     }
 
     returnCranePos(){
