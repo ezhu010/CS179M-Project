@@ -320,6 +320,7 @@ export default class BalanceShipGrid extends React.Component {
         this.setState({showRoute: true})
         this.handleDownload(top.grid)
     }
+
     getEmptySiftGrid(grid){
         var res = []
         for(var i = 0; i < grid.length; i++){

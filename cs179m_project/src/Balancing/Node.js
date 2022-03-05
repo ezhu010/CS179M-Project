@@ -37,7 +37,6 @@ export default class Node {
                 if(grid[i][j] instanceof UnusedSlot){
                     temp.push(Object.assign(new UnusedSlot([i,j])))
                 }
-            
             }
             res.push(temp)
         }

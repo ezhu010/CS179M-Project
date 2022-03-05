@@ -10,6 +10,7 @@ export default class BalanceSearch {
 
     greedySearch(){
         var count = 0
+        console.log(this.initialNode)
         this.frontier.push(this.initialNode, this.initialNode.computeHeuristic())
         this.visited.push(this.initialNode)
         while(this.frontier.size > 0){
@@ -33,6 +34,8 @@ export default class BalanceSearch {
             }
             this.frontier.pop() 
             var children = top.generateAllChildren()
+            // console.log(children)
+            // break
             for(let child of children){
                 for (let lilguy of child){
                     if(!this.isFoundInVisited(lilguy)){

@@ -61,7 +61,7 @@ componentWillReceiveProps(props) {
     return(
         <ListItem key={index} component="div" style={style} disablePadding>
               <ListItemButton>
-      <ListItemText onClick={() => this.test()}component="div">{this.state.listItems[index].name}</ListItemText>
+      <ListItemText component="div">{this.state.listItems[index].name}</ListItemText>
       <TiDelete onClick={() => this.deleteContainer(index)}/>
            </ListItemButton>
       </ListItem>

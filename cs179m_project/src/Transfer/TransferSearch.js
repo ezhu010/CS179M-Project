@@ -7,7 +7,11 @@ export default class TransferSearch {
         this.frontier = new MinQueue(1000000, [], [], TransferNode, Uint32Array)
         this.unloadList = unloadList
         this.loadList = loadList
-        this.initialNode = new TransferNode(shipGrid, allContainers, this.generateTruckList())
+
+        console.log(unloadList);
+        console.log(loadList);
+
+        this.initialNode = new TransferNode(shipGrid, allContainers, 0, this.generateTruckList())
         this.visited = []
     }
 
@@ -28,16 +32,19 @@ export default class TransferSearch {
             }
             
             if (top.isGoalState(this.unloadList, this.loadList)) {
-                var route = top.traceBackRoot();
                 top.returnCranePos()
                 console.log("TOP:", top)
+                var route = top.traceBackRoot();
+                console.log(route)
+
                 console.log(top.computeHeuristic())
                 return [top, route];
             }
 
             this.frontier.pop() 
             var children = top.generateAllChildren()
-            console.log(children)
+            console.log("children ", children)
+            // break
             for(let child of children){
                 for (let lilguy of child){
                     if(!this.isFoundInVisited(lilguy)){
@@ -46,7 +53,6 @@ export default class TransferSearch {
                     }
                 }
             }
-            break
         }
     }
 

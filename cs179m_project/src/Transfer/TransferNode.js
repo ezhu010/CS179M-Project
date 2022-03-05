@@ -2,8 +2,9 @@ import ContainerSlot from "../components/ContainerSlot"
 import UnusedSlot from "../components/UnusedSlot"
 import NaNSlot from "../components/NaNSlot"
 
+
 export default class TransferNode {
-    constructor(grid, allContainers, truckList, cost = 0, root = null, cranePos = [8, 0]){
+    constructor(grid, allContainers, cost = 0, truckList, root = null, cranePos = [8, 0]){
         this.grid = grid
         this.allContainers = allContainers;
         this.truckList = truckList
@@ -12,30 +13,10 @@ export default class TransferNode {
         this.cranePos = cranePos
     }
 
-    isGoalState(unloadList, loadList){
-        for (let container of loadList){
-            let [x, y] = this.getContainerCoord(container)
-            if (x === -1 && y === -1) return false
-        }
-        for (let container of unloadList){
-            if (!this.foundInTruckList(container)) return false
-        }
-        return true
-    }
-
-    foundInTruckList(container){
-        console.log("Truck List: " + this.truckList)
-        for (let c of this.truckList){
-            if (c.name === container.name) return true
-        }
-        return false
-    }
-
     generateAllChildren() {
         let res = []
         for(let col = 0; col <= 11; col++) {
             let colRes = this.generateChildrenColumn(col)
-            if(col == 2) break
             if(colRes !== -1){
                 res.push(colRes)
             }
@@ -43,30 +24,47 @@ export default class TransferNode {
         return res;
     }
 
+    isGoalState(unloadList, loadList){
+        // console.log("unloadlist ", unloadlist)
+        // console.log("loadlist ", loadlist)
+        // for (let container of loadList){
+        //     let [x, y] = this.getContainerCoord(container)
+        //     if (x === -1 && y === -1) return false
+        // }
+        for (let container of unloadList){
+            if (!this.foundInTruckList(container)){
+                console.log(container);
+                return false
+            }
+        }
+        return true
+    }
+
+    foundInTruckList(container){
+        console.log("Truck List: ", this.truckList)
+        for (let c of this.truckList){
+            if (c.name === container.name) return true
+        }
+        return false
+    }
+
     getShallowGrid(grid){
         var res = []
-        console.log("Before:" , grid);
         for(var i = 0; i < grid.length; i++){
             var temp = []
             for(var j = 0; j < grid[i].length; j++){
-
                 if(grid[i][j] instanceof ContainerSlot){
-               
                     temp.push(Object.assign(new ContainerSlot([i,j], grid[i][j].weight, grid[i][j].name), grid[i][j]))
                 } 
-                else if(grid[i][j] instanceof NaNSlot){
+                if(grid[i][j] instanceof NaNSlot){
                     temp.push(Object.assign(new NaNSlot([i,j])))
                 }
-                else if(grid[i][j] instanceof UnusedSlot){
-                             if(i == 2 && j == 0){
-                            console.log("WTF:" , grid[i][j])
-                        }
+                if(grid[i][j] instanceof UnusedSlot){
                     temp.push(Object.assign(new UnusedSlot([i,j])))
                 }
             }
             res.push(temp)
         }
-        console.log("RES:" , res);
         return res
     }
 
@@ -78,36 +76,6 @@ export default class TransferNode {
         return res
     }
 
-    generateChildrenColumn(col) {
-        let res = []
-        let [hiRow, hiCol] = this.highestContainerSlot(col)
-        console.log(hiRow, " ", hiCol);
-        if (hiRow == -1 && hiCol == -1) return -1
-        for (let c = 0; c <= 11; ++c){
-            console.log("testing here")
-            if(c == col){
-                continue
-            }
-            let [lowRow, lowCol] = this.lowestUnusedSlot(c);
-            if(lowRow > 7) continue
-            let tempGrid = this.getShallowGrid(this.grid)
-            // console.log("grid", this.grid)
-            let allShallowContainer = this.getShallowAllContainers(this.allContainers)
-            let tempTruckList = this.getShallowAllContainers(this.truckList)
-            let newNode = new TransferNode(tempGrid, allShallowContainer, tempTruckList, this.cost + this.getManhattanDistance(this.cranePos[0], this.cranePos[1], hiRow, hiCol) + this.getManhattanDistance(hiRow, hiCol, lowRow, lowCol), this, [lowRow, lowCol])
-            // break
-            newNode.swapSlots(newNode.grid[hiRow][hiCol], newNode.grid[lowRow][lowCol])
-            break;
-            res.push(newNode)
-            
-        }
-        // remove from truck to ship
-        // 
-        // console.log("Children 0", res[0])
-        // res.push(this.generateChildrenToTruck(hiRow, hiCol))
-        return res;
-    }
-
     generateChildrenToTruck(hiRow, hiCol) {
         let tempGrid = this.getShallowGrid(this.grid)
         let tempTruckList = this.getShallowAllContainers(this.truckList)
@@ -115,20 +83,44 @@ export default class TransferNode {
         tempAllContainers.filter(container => {
             return container.row !== hiRow && container.column !== hiCol
         })
-        // console.log("temp grid ", tempGrid)
-        console.log("contaienr", tempGrid[hiRow][hiCol])
         tempTruckList.push(tempGrid[hiRow][hiCol])
-        // let allShallowContainer = this.getShallowAllContainers(this.allContainers)
-        let newTruckNode = new TransferNode(tempGrid, tempAllContainers, tempTruckList, this.cost + this.getManhattanDistance(this.cranePos[0], this.cranePos[1], hiRow, hiCol) + 15, this, [8, 0])
+        tempGrid[hiRow][hiCol] = new UnusedSlot([hiRow, hiCol])
+        let newTruckNode = new TransferNode(tempGrid, tempAllContainers, this.cost + (this.getManhattanDistance(this.cranePos[0], this.cranePos[1], hiRow, hiCol) * 2) + 15, tempTruckList, this, [8, 0])
         return newTruckNode;
     }
+    
+    // generateChildrenFromTruckToShip(res){
+    //     //for each colum call generateChildrenFromTruckToShipCol
+    //     
+    // }
 
-    generateChildrenFromTruckToShip(res){
-        //for each colum call generateChildrenFromTruckToShipCol
-    }
+    // generateChildrenFromTruckToShipCol(col){
 
-    generateChildrenFromTruckToShipCol(col){
+    // }
+    
 
+    generateChildrenColumn(col) {
+        let res = []
+        let [hiRow, hiCol] = this.highestContainerSlot(col)
+        // console.log(hiRow, " ", hiCol);
+        if (hiRow == -1 && hiCol == -1) return -1
+        for (let c = 0; c <= 11; ++c){
+            if(c == col){
+                continue
+            }
+            let [lowRow, lowCol] = this.lowestUnusedSlot(c);
+            if(lowRow > 7) continue
+            let tempGrid = this.getShallowGrid(this.grid)
+            let tempTruckList = this.getShallowAllContainers(this.truckList)
+            let allShallowContainer = this.getShallowAllContainers(this.allContainers)
+            let newNode = new TransferNode(tempGrid, allShallowContainer, this.cost + this.getManhattanDistance(this.cranePos[0], this.cranePos[1], hiRow, hiCol) + this.getManhattanDistance(hiRow, hiCol, lowRow, lowCol), tempTruckList, this, [lowRow, lowCol])
+            newNode.swapSlots(newNode.grid[hiRow][hiCol], newNode.grid[lowRow][lowCol])
+            res.push(newNode)
+        }
+
+        res.push(this.generateChildrenToTruck(hiRow, hiCol))
+
+        return res;
     }
 
     highestContainerSlot(col){
@@ -142,7 +134,6 @@ export default class TransferNode {
         if(row === -1 || foundContainer === false)
             return [-1, -1]
 
-
         return [row, col]
     }
 
@@ -154,30 +145,19 @@ export default class TransferNode {
         return [row, col]
     }
 
-    // don't write code like this...
     swapSlots(s1, s2){ //s1: container, s2: unused slot
-        console.log("SWAPPING BEFORE...", s1, s2);
         let tmpSlot = s1; 
-        console.log(tmpSlot);
-
         let s1Row = s1.row
         let s1Col = s1.column
         let s2Row = s2.row
         let s2Col = s2.column
-
-        // console.log(this.grid[s1Row][s1Col]);
-        // console.log(this.grid[s2Row][s2Col]);
-        // console.log(tmpSlot);
-
-        this.grid[s1Row][s1Col] = s2
+        
+        this.grid[s1.row][s1.column] = s2
         s1.column = s2.column
         s1.row = s2.row
         this.grid[s2.row][s2.column] = tmpSlot
         s2.column = s1Col
         s2.row = s1Row
-    
-        // console.log(this.grid[s1Row][s1Col]);
-        // console.log(this.grid[s2Row][s2Col]);
 
         //swap allContainers
         let s1Container 
@@ -188,7 +168,11 @@ export default class TransferNode {
                 break
             }
         }
-        console.log("SWAPPING AFTER...", s1, s2);
+    }
+    getManhattanDistance(x1, y1, x2, y2) { //g(n)
+        var xDist = Math.abs(x1 - x2)
+        var yDist = Math.abs(y1 - y2)
+        return yDist + xDist 
     }
 
     isEqualTo(node){
@@ -200,12 +184,6 @@ export default class TransferNode {
             }
         }
         return true
-    }
-
-    getManhattanDistance(x1, y1, x2, y2) { //g(n)
-        var xDist = Math.abs(x1 - x2)
-        var yDist = Math.abs(y1 - y2)
-        return yDist + xDist 
     }
 
     findRouteFromRoot() {
@@ -222,10 +200,12 @@ export default class TransferNode {
 
     traceBackRoot() {
         let route = this.findRouteFromRoot()
+        console.log("route, ", route)
         let craneX = 9, craneY = 1;
         var res = []
         for(let i = 0; i < route.length  - 1; i++) {
             let contianerMoved = route[i].findContainerMoved(route[i + 1])
+            console.log("cnt moved: ", contianerMoved)
             // crane movement
             if(craneX !== contianerMoved[0].row  + 1 || craneY !== contianerMoved[0].column + 1)
             res.push("Move crane from ["+ craneX +", " + craneY +
@@ -244,6 +224,8 @@ export default class TransferNode {
     }
 
     findContainerMoved(child) {
+        console.log("this", this.allContainers)
+        console.log("child", child.allContainers)
         for(let i = 0; i < this.allContainers.length; i++) {
             for(let j = 0; j < child.allContainers.length; j++)
             if(child.allContainers[j].name === this.allContainers[i].name) {
@@ -252,26 +234,42 @@ export default class TransferNode {
                         return [this.allContainers[i], child.allContainers[j]]
             } 
         }
+        // we have moved the container off the ship
     }
 
     returnCranePos(){
         this.cost += this.getManhattanDistance(this.cranePos[0], this.cranePos[1], 8, 0)
         this.cranePos = [8, 0]
     }
-
-    computeHeuristic() {
+    
+    computeHeuristic(){
+        // var count = 0;
+        // var leftSide = this.getPortSideWeight()
+        // var rightSide = this.getStarboardSideWeight()
+        // var balanceMass = (leftSide + rightSide) / 2.0;
+        // var diff = (balanceMass - Math.min(leftSide, rightSide)) // (x/y) = (x+ y)).9
+        // // sort containers of left side by mass
+        // // list.sort((a, b) => (a.color > b.color) ? 1 : -1)
+        // var containersSorted = this.allContainers.filter(a => a.column <= 5).sort((a, b) => b.weight - a.weight)
+        // let i = 0;
+        // while(diff >= 0 && i < containersSorted.length) {
+        //     diff -= containersSorted[i];
+        //     i++;
+        //     count++;
+        // }
+        // return count;
         return 0;
     }
 
-    getContainerCoord(container){
-        for (let i = 0; i < this.grid.length; ++i){
-            for (let j = 0; j < this.grid[i].length; ++j){
-                if (this.grid[i][j].name == container.name){
-                    return [i,j]
-                }
-            }
-        }
-        console.log("Should not get here")
-        return [-1, -1]
-    }
+    // getContainerCoord(goalState, container){
+    //     for (let i = 0; i < goalState.grid.length; ++i){
+    //         for (let j = 0; j < goalState.grid[i].length; ++j){
+    //             if (goalState.grid[i][j].name == container.name){
+    //                     return [i,j]
+    //             }
+    //         }
+    //     }
+    //     console.log("Should not get here")
+    //     return [-1, -1]
+    // }
 }
