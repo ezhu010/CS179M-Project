@@ -320,23 +320,29 @@ export default class TransferNode {
         this.cranePos = [8, 0]
     }
     
-    computeHeuristic(){
-        // var count = 0;
-        // var leftSide = this.getPortSideWeight()
-        // var rightSide = this.getStarboardSideWeight()
-        // var balanceMass = (leftSide + rightSide) / 2.0;
-        // var diff = (balanceMass - Math.min(leftSide, rightSide)) // (x/y) = (x+ y)).9
-        // // sort containers of left side by mass
-        // // list.sort((a, b) => (a.color > b.color) ? 1 : -1)
-        // var containersSorted = this.allContainers.filter(a => a.column <= 5).sort((a, b) => b.weight - a.weight)
-        // let i = 0;
-        // while(diff >= 0 && i < containersSorted.length) {
-        //     diff -= containersSorted[i];
-        //     i++;
-        //     count++;
-        // }
-        // return count;
-        return 0;
+    computeHeuristic(unloadList, loadList){
+        // calculate how many of the items in loadList have been moved to the ship
+        let temp = 0;
+        for(let i = 0; i < loadList.length; i++) {
+            for(let j = 0; j < this.allContainers.length; j++) {
+                if(loadList[i].name === this.allContainers[i].name)
+                    temp++;
+            }
+        }
+
+        // calculate how many of the items in uloadList have been moved off the ship
+        let temp2 = 0;
+        for(let i = 0; i < unloadList.length; i++) {
+            for(let j = 0; j < this.truckList.length; j++) {
+                if(unloadList[i].name === this.truckList[i].name)
+                    temp2++;
+            }
+        }
+        let containersToSwap = loadList.length + unloadList.length;
+        let containersSwapped = temp + temp2;
+        // console.log("Hueristic is ", containersToSwap - containersSwapped)
+        return containersToSwap - containersSwapped;
+        // return 0;
     }
 
     getContainerCoord(container){

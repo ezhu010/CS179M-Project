@@ -17,12 +17,12 @@ export default class TransferSearch {
 
     greedySearch(){
         // console.log("initialNode", this.initialNode);
+        console.time("search")
         var count = 0
-        this.frontier.push(this.initialNode, this.initialNode.computeHeuristic())
+        this.frontier.push(this.initialNode, this.initialNode.computeHeuristic(this.unloadList, this.loadList))
         this.visited.push(this.initialNode)
         while(this.frontier.size > 0){
             ++count
-
             let top = this.frontier.peek()
             
             if (count % 50 === 0) {
@@ -36,17 +36,17 @@ export default class TransferSearch {
                 console.log("TOP:", top)
                 var route = top.traceBackRoot();
                 console.log(route)
-                console.log(top.computeHeuristic())
+                console.log(top.computeHeuristic(this.unloadList, this.loadList))
+                console.timeEnd("search")
                 return [top, route];
             }
 
             this.frontier.pop() 
             var children = top.generateAllChildren()
-
             for(let child of children){
                 for (let lilguy of child){
                     if(!this.isFoundInVisited(lilguy)){
-                        this.frontier.push(lilguy, lilguy.cost + lilguy.computeHeuristic()) 
+                        this.frontier.push(lilguy, lilguy.cost + lilguy.computeHeuristic(this.unloadList, this.loadList)) 
                         this.visited.push(lilguy)
                     }
                 }
