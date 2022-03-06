@@ -1,6 +1,7 @@
 import ContainerSlot from "../components/ContainerSlot"
 import UnusedSlot from "../components/UnusedSlot"
 import NaNSlot from "../components/NaNSlot"
+import _ from "lodash"
 
 
 export default class TransferNode {
@@ -21,19 +22,21 @@ export default class TransferNode {
                 res.push(colRes)
             }
         }
+        // console.log(res)
+        let children = this.generateChildrenFromTruckToShip()
+        res.push(children)
         return res;
     }
 
     isGoalState(unloadList, loadList){
-        // console.log("unloadlist ", unloadlist)
-        // console.log("loadlist ", loadlist)
-        // for (let container of loadList){
-        //     let [x, y] = this.getContainerCoord(container)
-        //     if (x === -1 && y === -1) return false
-        // }
+        // console.log("loadlist ", loadList)
+        for (let container of loadList){
+            let [x, y] = this.getContainerCoord(container)
+            if (x === -1 && y === -1) return false
+        }
         for (let container of unloadList){
             if (!this.foundInTruckList(container)){
-                console.log(container);
+                // console.log(container);
                 return false
             }
         }
@@ -41,7 +44,6 @@ export default class TransferNode {
     }
 
     foundInTruckList(container){
-        console.log("Truck List: ", this.truckList)
         for (let c of this.truckList){
             if (c.name === container.name) return true
         }
@@ -54,7 +56,7 @@ export default class TransferNode {
             var temp = []
             for(var j = 0; j < grid[i].length; j++){
                 if(grid[i][j] instanceof ContainerSlot){
-                    temp.push(Object.assign(new ContainerSlot([i,j], grid[i][j].weight, grid[i][j].name), grid[i][j]))
+                    temp.push(Object.assign(new ContainerSlot([i,j], grid[i][j].weight, grid[i][j].name)))
                 } 
                 if(grid[i][j] instanceof NaNSlot){
                     temp.push(Object.assign(new NaNSlot([i,j])))
@@ -76,13 +78,19 @@ export default class TransferNode {
         return res
     }
 
+    filterContainer(tempAllContainers, hiRow, hiCol){
+        for(let i = 0; i < tempAllContainers.length; ++i){
+            if (tempAllContainers[i].row == hiRow && tempAllContainers[i].column == hiCol){
+                tempAllContainers.splice(i, 1)
+            }
+        }
+    }
+
     generateChildrenToTruck(hiRow, hiCol) {
         let tempGrid = this.getShallowGrid(this.grid)
         let tempTruckList = this.getShallowAllContainers(this.truckList)
         let tempAllContainers = this.getShallowAllContainers(this.allContainers)
-        tempAllContainers = tempAllContainers.filter(container => {
-            return container.row !== hiRow && container.column !== hiCol
-        })
+        this.filterContainer(tempAllContainers, hiRow, hiCol)
         tempTruckList.push(tempGrid[hiRow][hiCol])
         tempGrid[hiRow][hiCol] = new UnusedSlot([hiRow, hiCol])
         let cost = this.cost + this.getManhattanDistance(this.cranePos[0], this.cranePos[1], hiRow, hiCol) + this.getManhattanDistance(8, 0, hiRow, hiCol) + 15
@@ -90,15 +98,30 @@ export default class TransferNode {
         return newTruckNode;
     }
     
-    // generateChildrenFromTruckToShip(res){
-    //     //for each colum call generateChildrenFromTruckToShipCol
-    //     
-    // }
-
-    // generateChildrenFromTruckToShipCol(col){
-
-    // }
-    
+    generateChildrenFromTruckToShip(){
+        let res = []
+        for (let container of this.truckList) {
+            for (let c = 0; c <= 11; ++c){
+                let [lowRow, lowCol] = this.lowestUnusedSlot(c);
+                if(lowRow > 7) continue
+                let tempGrid = this.getShallowGrid(this.grid)
+                tempGrid[lowRow][lowCol] = new ContainerSlot([lowRow,lowCol], container.weight, container.name)
+                let tempTruckList = this.getShallowAllContainers(this.truckList)
+                for (let i = 0; i < tempTruckList.length; ++i){
+                    if (tempTruckList[i].name === container.name){ 
+                        tempTruckList.splice(i, 1)
+                        break
+                    }
+                }
+                let allShallowContainer = this.getShallowAllContainers(this.allContainers)
+                allShallowContainer.push(Object.assign(new ContainerSlot([lowRow, lowCol], container.weight, container.name)))
+                let cost = this.cost + 15 + this.getManhattanDistance(this.cranePos[0], this.cranePos[1], 8, 0) + this.getManhattanDistance(8, 0, lowRow, lowCol)
+                let newNode = new TransferNode(tempGrid, allShallowContainer, cost, tempTruckList, this, [lowRow, lowCol])
+                res.push(newNode)
+            }
+        }
+        return res
+    }
 
     generateChildrenColumn(col) {
         let res = []
@@ -199,6 +222,15 @@ export default class TransferNode {
         return res;
     }
 
+    twoDigs(num) {
+        if(num < 10) {
+            return "0" + num
+        }
+        else{
+            return num
+        }
+    }
+
     traceBackRoot() {
         let route = this.findRouteFromRoot()
         console.log("route, ", route)
@@ -207,55 +239,80 @@ export default class TransferNode {
         for(let i = 0; i < route.length  - 1; i++) {
             if(route[i].allContainers.length > route[i + 1].allContainers.length) {
                 // moved container from ship to truck
-                console.log("moved container from ship to truck ", route[i].allContainers, route[i + 1].allContainers)
+                //console.log("moved container from ship to truck ", route[i].allContainers, route[i + 1].allContainers)
                 let contianerRemoved = route[i].findContainerRemoved(route[i + 1])
-
+                if(craneX !== contianerRemoved.row  + 1 || craneY !== contianerRemoved.column + 1) {
+                    res.push("Move crane from ["+ this.twoDigs(craneX) +", " + this.twoDigs(craneY) +
+                    "] to ["+ this.twoDigs((Number(contianerRemoved.row)  + 1)) + ", " + this.twoDigs((Number(contianerRemoved.column) + 1)) +  "]")
+                }
+                // container movement
+                res.push("Move container " + contianerRemoved.name +  
+                " from [" + this.twoDigs((Number(contianerRemoved.row) + 1)) + ", " + this.twoDigs((Number(contianerRemoved.column) + 1)) + "] to the truck zone")
+                res.push("Move crane from the truck zone to [09 , 01]")
+                craneX = 9;
+                craneY = 1;
             }
-            else if(route[i].allContainers.length > route[i + 1].allContainers.length) {
+            else if(route[i].allContainers.length < route[i + 1].allContainers.length) {
+                // break;
+                // console.log("moving from truck to ship")
                 // moved container from truck to ship
+                let contianerRemoved = route[i + 1].findContainerRemoved(route[i])
+                if(craneX !== 9 || craneY !== 1) {
+                    res.push("Move crane from ["+ this.twoDigs(craneX) +", " + this.twoDigs(craneY) +
+                    "] to [09, 01]")
+                }
+                
+                res.push("Move container " + contianerRemoved.name + " from the truck zone to [" + this.twoDigs((Number(contianerRemoved.row)  + 1)) + ", " + 
+                this.twoDigs((Number(contianerRemoved.column) + 1)) +  "]")
+
+                
+                // // container movement
+                // res.push("Move container " + contianerRemoved.name +  
+                // " from [" + this.twoDigs((Number(contianerRemoved.row) + 1)) + ", " + this.twoDigs((Number(contianerRemoved.column) + 1)) + "] to the truck zone")
+                // craneX = 9;
+                // craneY = 1;
             }
             else {
                 let contianerMoved = route[i].findContainerMoved(route[i + 1])
                 // crane movement
-                if(craneX !== contianerMoved[0].row  + 1 || craneY !== contianerMoved[0].column + 1)
-                res.push("Move crane from ["+ craneX +", " + craneY +
-                "] to ["+ contianerMoved[0].row  + 1 + ", " + contianerMoved[0].column + 1 +  "]")
+                if(craneX !== contianerMoved[0].row  + 1 || craneY !== contianerMoved[0].column + 1){
+                    res.push("Move crane from ["+ this.twoDigs(craneX) +", " + this.twoDigs(craneY) +
+                    "] to ["+ this.twoDigs(Number(contianerMoved[0].row)  + 1) + ", " + this.twoDigs(Number(contianerMoved[0].column) + 1) +  "]")
+                }
                 // container movement
                 res.push("Move container " + contianerMoved[0].name +  
-                " from [" + contianerMoved[0].row + 1 + ", " + contianerMoved[0].column + 1 + "] to [" +
-                contianerMoved[1].row + 1 + ", " + contianerMoved[1].column + 1 + "]")
-                craneX = contianerMoved[1].row + 1;
-                craneY = contianerMoved[1].column + 1;
+                " from [" + this.twoDigs((Number(contianerMoved[0].row) + 1)) + ", " + this.twoDigs((Number(contianerMoved[0].column) + 1)) + "] to [" +
+                this.twoDigs((Number(contianerMoved[1].row)+ 1)) + ", " + this.twoDigs((Number(contianerMoved[1].column) + 1)) + "]")
+                craneX = Number(contianerMoved[1].row) + 1;
+                craneY = Number(contianerMoved[1].column) + 1;
             }
         }
         // Reset crane position at the end
         if(craneX !== 9 && craneY !== 1)
             res.push("Move crane from [" + craneX +  ", " + craneY + 
-             "] to [ 9 , 1 ]")
+             "] to [ 09 , 01 ]")
         return res
     }
 
     findContainerMoved(child) {
-        console.log("this", this.allContainers)
-        console.log("child", child.allContainers)
+        // console.log("this", this.allContainers)
+        // console.log("child", child.allContainers)
         for(let i = 0; i < this.allContainers.length; i++) {
             for(let j = 0; j < child.allContainers.length; j++)
             if(child.allContainers[j].name === this.allContainers[i].name) {
                 if(child.allContainers[j].column !== this.allContainers[i].column 
                     || child.allContainers[j].row !== this.allContainers[i].row )
                         return [this.allContainers[i], child.allContainers[j]]
-            } 
+            }
         }
     }
 
     findContainerRemoved(child) {
-        let i = 0;
-        let res = [];
-        for(i = 0; i < this.allContainers.length; i++) {
-            for(let j = 0; j < this.allContainers.length; j++) {
-                
-            }
-        }
+        // console.log("CHILD: " , child.allContainers);
+        // console.log("PARENT:" , this.allContainers);
+        const results = this.allContainers.filter(({ name: id1 }) => !child.allContainers.some(({ name: id2 }) => id2 === id1));
+        // console.log(results)
+        return results[0]
     }
 
     returnCranePos(){
@@ -282,15 +339,16 @@ export default class TransferNode {
         return 0;
     }
 
-    // getContainerCoord(goalState, container){
-    //     for (let i = 0; i < goalState.grid.length; ++i){
-    //         for (let j = 0; j < goalState.grid[i].length; ++j){
-    //             if (goalState.grid[i][j].name == container.name){
-    //                     return [i,j]
-    //             }
-    //         }
-    //     }
-    //     console.log("Should not get here")
-    //     return [-1, -1]
-    // }
+    getContainerCoord(container){
+        
+        for (let i = 0; i < this.grid.length; ++i){
+            for (let j = 0; j < this.grid[i].length; ++j){
+                if (this.grid[i][j].name == container.name){
+                        return [i,j]
+                }
+            }
+        }
+        // console.log("Should not get here")
+        return [-1, -1]
+    }
 }

@@ -442,13 +442,16 @@ export default class ShipGrid extends React.Component {
 
     performTransfer(){
         let tempGrid = this.getShallowGrid(this.state.grid)  
-        console.log("TempGrid", tempGrid)
         let offLoadContainers = this.getShallowAllContainers(JSON.parse(localStorage.getItem("slots")))
-        console.log(offLoadContainers)
-        let onLoadContainers = [] //this.getShallowAllContainers(JSON.parse(localStorage.getItem("addContainer")))
+        // console.log(offLoadContainers)
+        let onLoadContainers = this.getShallowAllContainers(JSON.parse(localStorage.getItem("addContainers")))
+        
         let tempAllContainers = this.getShallowAllContainers(this.state.allContainers)
         let transferSearch = new TransferSearch(tempGrid, tempAllContainers, offLoadContainers, onLoadContainers)
-        transferSearch.greedySearch();
+        let [newGrid, routes] = transferSearch.greedySearch();
+        this.setState({grid: newGrid.grid})
+        localStorage["slots"] = JSON.stringify([])
+        localStorage["addContainers"] = JSON.stringify([])
         console.log("finished greedy search")
         // let balanceSearch = new BalanceSearch(tempGrid, tempAllContainers)
         // let [top, route] = balanceSearch.greedySearch()

@@ -8,7 +8,7 @@ export default class TransferSearch {
         this.unloadList = unloadList
         this.loadList = loadList
 
-        console.log(unloadList);
+        // console.log(unloadList);
         console.log(loadList);
 
         this.initialNode = new TransferNode(shipGrid, allContainers, 0, this.generateTruckList())
@@ -16,7 +16,7 @@ export default class TransferSearch {
     }
 
     greedySearch(){
-        console.log("initialNode", this.initialNode);
+        // console.log("initialNode", this.initialNode);
         var count = 0
         this.frontier.push(this.initialNode, this.initialNode.computeHeuristic())
         this.visited.push(this.initialNode)
@@ -36,15 +36,13 @@ export default class TransferSearch {
                 console.log("TOP:", top)
                 var route = top.traceBackRoot();
                 console.log(route)
-
                 console.log(top.computeHeuristic())
                 return [top, route];
             }
 
             this.frontier.pop() 
             var children = top.generateAllChildren()
-            console.log("children ", children)
-            // break
+
             for(let child of children){
                 for (let lilguy of child){
                     if(!this.isFoundInVisited(lilguy)){

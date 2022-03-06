@@ -382,6 +382,8 @@ export default class BalanceShipGrid extends React.Component {
             let balanceSearch = new BalanceSearch(tempGrid, allShallowContainer)
             let [top, route] = balanceSearch.greedySearch()
             console.log(top.grid)
+            console.log(route)
+            this.setState({grid: top.grid})
             this.setState({downloadReady: true})
             this.setState({showRoute: true})
             this.handleDownload(top.grid)
