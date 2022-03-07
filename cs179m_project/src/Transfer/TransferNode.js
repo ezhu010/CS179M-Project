@@ -246,7 +246,7 @@ export default class TransferNode {
                     "] to ["+ this.twoDigs((Number(contianerRemoved.row)  + 1)) + ", " + this.twoDigs((Number(contianerRemoved.column) + 1)) +  "]")
                 }
                 // container movement
-                res.push("Move container " + contianerRemoved.name +  
+                res.push("Move " + '"' + contianerRemoved.name + '"' + 
                 " from [" + this.twoDigs((Number(contianerRemoved.row) + 1)) + ", " + this.twoDigs((Number(contianerRemoved.column) + 1)) + "] to the truck zone")
                 res.push("Move crane from the truck zone to [09 , 01]")
                 craneX = 9;
@@ -262,7 +262,7 @@ export default class TransferNode {
                     "] to [09, 01]")
                 }
                 
-                res.push("Move container " + contianerRemoved.name + " from the truck zone to [" + this.twoDigs((Number(contianerRemoved.row)  + 1)) + ", " + 
+                res.push("Move " + '"' + contianerRemoved.name + '"' + " from the truck zone to [" + this.twoDigs((Number(contianerRemoved.row)  + 1)) + ", " + 
                 this.twoDigs((Number(contianerRemoved.column) + 1)) +  "]")
 
                 
@@ -280,7 +280,7 @@ export default class TransferNode {
                     "] to ["+ this.twoDigs(Number(contianerMoved[0].row)  + 1) + ", " + this.twoDigs(Number(contianerMoved[0].column) + 1) +  "]")
                 }
                 // container movement
-                res.push("Move container " + contianerMoved[0].name +  
+                res.push("Move " + '"' + contianerMoved[0].name +  '"' +
                 " from [" + this.twoDigs((Number(contianerMoved[0].row) + 1)) + ", " + this.twoDigs((Number(contianerMoved[0].column) + 1)) + "] to [" +
                 this.twoDigs((Number(contianerMoved[1].row)+ 1)) + ", " + this.twoDigs((Number(contianerMoved[1].column) + 1)) + "]")
                 craneX = Number(contianerMoved[1].row) + 1;
@@ -341,7 +341,7 @@ export default class TransferNode {
         let containersToSwap = loadList.length + unloadList.length;
         let containersSwapped = temp + temp2;
         // console.log("Hueristic is ", containersToSwap - containersSwapped)
-        return containersToSwap - containersSwapped;
+        return (containersToSwap - containersSwapped) * 15;
         // return 0;
     }
 

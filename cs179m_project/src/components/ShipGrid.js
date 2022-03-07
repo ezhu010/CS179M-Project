@@ -40,7 +40,7 @@ export default class ShipGrid extends React.Component {
             useSift: false,
             downloadReady: false,
             showRoute: false, 
-            route: "",
+            route: [],
             open: false,
             manifestDataNew: ""
         }
@@ -108,8 +108,14 @@ export default class ShipGrid extends React.Component {
                 tmp = []
             }
         })
-            console.log(this.state.manifestName)
-            var sendData = `Manifest ${this.state.manifestName} is opened, there are ${containerCount} containers on the ship\n`
+            var currentdate = new Date();
+            var datetime = currentdate.getDate() + "/"
+                    + (currentdate.getMonth() + 1)  + "/" 
+                    + currentdate.getFullYear() + " "  
+                    + (currentdate.getHours()<10 ? '0' + currentdate.getHours() : currentdate.getHours()) + ":"  
+                    + (currentdate.getMinutes()<10 ? '0' + currentdate.getMinutes() : currentdate.getMinutes()) + ":" 
+                    + (currentdate.getSeconds()<10 ? '0' + currentdate.getSeconds() : currentdate.getSeconds())
+            var sendData = `${datetime} Manifest ${this.state.manifestName} is opened, there are ${containerCount} containers on the ship\n`
             var manifestInfo = {}
             manifestInfo.logData = sendData        
             axios
@@ -152,33 +158,6 @@ export default class ShipGrid extends React.Component {
         }
     }
     
-    getPortSideWeight(){
-        //left side
-        var res = 0;
-        for(let container of this.state.allContainers) {
-            if(container.column < 7) 
-                res += parseInt(container.weight)
-        }
-        return res;
-    }
-    getStarboardSideWeight(){
-        var res = 0;
-        for(let container of this.state.allContainers) {
-            if(container.column >= 7) 
-                res += parseInt(container.weight)
-        }
-        return res;
-    }
-
-    isBalanced(){
-        // console.log(this.state.allContainers);
-        var leftSide = this.getPortSideWeight()
-        var rightSide = this.getStarboardSideWeight()
-        // console.log((leftSide == rightSide || (leftSide / rightSide >= 0.9 && leftSide / rightSide <= 1.1)));
-        this.setState({isShipBalanced:(leftSide == rightSide || (leftSide / rightSide >= 0.9 && leftSide / rightSide <= 1.1))})
-        this.setState({useSift: this.isPossibleToBalance()})
-    }
-    
     findMin(arr, n)
     {
         let sum = 0;
@@ -195,7 +174,6 @@ export default class ShipGrid extends React.Component {
                     dp[i][j] = true;
             }
         }
-    
         for (let i = 1; i <= sum; i++)
             dp[0][i] = false;
 
@@ -204,17 +182,12 @@ export default class ShipGrid extends React.Component {
             for (let j=1; j<=sum; j++)
             {
                 dp[i][j] = dp[i-1][j];
-
-                if (arr[i-1] <= j)
-                    dp[i][j] |= dp[i-1][j-arr[i-1]];
+                if (arr[i-1] <= j) dp[i][j] |= dp[i-1][j-arr[i-1]];
             }
         }
-
         let diff = Number.MAX_VALUE;
-        
         for (let j=Math.floor(sum/2); j>=0; j--)
         {
-
             if (dp[n][j] == true)
             {
                 diff = sum-2*j;
@@ -222,125 +195,6 @@ export default class ShipGrid extends React.Component {
             }
         }
         return diff;
-    }
-        
-    isPossibleToBalance(){
-        let weights = []
-        let w = 0;
-        for(let container of this.state.allContainers) {
-            w += parseInt(container.weight)
-            weights.push(parseInt(container.weight))
-        }
-        let minDiff = this.findMin(weights, weights.length)
-        // console.log(minDiff);
-        let leftSide = (w / 2) + (minDiff / 2)
-        let rightSide = (w / 2) - (minDiff / 2)
-        return (leftSide == rightSide || (leftSide / rightSide >= 0.9 && leftSide / rightSide <= 1.1))
-    }
-
-    performSift(){
-        // console.log(this.state.allContainers)
-        // 1. sort the container list by weight
-        let sortedList = []
-        sortedList = this.state.allContainers.sort((a, b) => parseInt(b.weight) - parseInt(a.weight))
-        // console.log(sortedList)
-        // console.log(this.state.grid)
-        var instructionsList = [] // [{startPos: [1,6], endPos:[1,6]}    ]
-        let leftSidePtr = [1, 6]
-        let rightSidePtr = [1, 7]
-        var startPos, endPos = []
-        for(var i = 0; i < sortedList.length; i++){
-            startPos = [sortedList[i].row,sortedList[i].column]
-            endPos = []
-            if(i % 2 == 0) {
-                let gridSlot= this.state.grid[leftSidePtr[0] - 1][leftSidePtr[1] - 1]
-                while(gridSlot instanceof NaNSlot) {
-                    if(leftSidePtr[1] == 1) {
-                        leftSidePtr[0]++
-                        leftSidePtr[1] = 6
-                    }
-                    else
-                        leftSidePtr[1]--
-                    gridSlot= this.state.grid[leftSidePtr[0] -1 ][leftSidePtr[1] - 1]
-                }
-                endPos = leftSidePtr.slice()
-                if(leftSidePtr[1] == 1) {
-                    leftSidePtr[0]++
-                    leftSidePtr[1] = 6
-                }
-                else
-                    leftSidePtr[1]--
-            }
-            else {
-                let gridSlot= this.state.grid[rightSidePtr[0] - 1][rightSidePtr[1] - 1]
-                while(gridSlot instanceof NaNSlot) {
-                    if(rightSidePtr[1] == 12) {
-                        rightSidePtr[0]++
-                        rightSidePtr[1] = 7
-                    }
-                    else
-                        rightSidePtr[1]++
-                    gridSlot= this.state.grid[rightSidePtr[0] -1 ][rightSidePtr[1] - 1]
-                }
-                endPos = rightSidePtr.slice()
-                if(rightSidePtr[1] == 12) {
-                    rightSidePtr[0]++
-                    rightSidePtr[1] = 7
-                }
-                else
-                    rightSidePtr[1]++
-            }
-            instructionsList.push({"startPos": startPos, "endPos": endPos, "containerName": sortedList[i].name, "grid": this.state.grid, "weight": sortedList[i].weight })
-        }
-        // console.log(instructionsList)
-        var siftGrid = this.getEmptySiftGrid(this.state.grid)
-        // populate all containers list
-        var siftAllContainers = []
-        for(var i = 0; i < instructionsList.length; i++) {
-            let item = instructionsList[i]
-            // console.log(item);
-            let newCnt = new ContainerSlot([item.endPos[0] - 1, item.endPos[1] - 1], item.weight, item.containerName)
-            siftAllContainers.push(newCnt)
-        }
-        // loop through instruction list and populate siftGrid
-        
-        
-        for(var i = 0; i < instructionsList.length; i++){
-            let item = instructionsList[i]
-            // siftGrid[item.endPos[0]][item.endPos[1]] = {}
-            siftGrid[item.endPos[0] - 1][item.endPos[1] - 1] = new ContainerSlot([item.endPos[0] - 1, item.endPos[1] - 1], item.weight, item.containerName)
-        }
-        let SIFT = new Sift(this.state.grid, siftGrid, this.state.allContainers, siftAllContainers)
-        let [top, route] = SIFT.performSiftSearch()
-        // top is the goal state, rerender top
-        console.log("top", top.grid);
-        this.setState({route: route})
-        this.setState({grid: top.grid})
-        this.setState({downloadReady: true})
-        this.setState({showRoute: true})
-        this.handleDownload(top.grid)
-    }
-
-    getEmptySiftGrid(grid){
-        var res = []
-        for(var i = 0; i < grid.length; i++){
-            var temp = []
-            for(var j = 0; j < grid[i].length; j++){
-                if(grid[i][j] instanceof ContainerSlot){
-                    temp.push(Object.assign(new UnusedSlot([i,j])))
-                } 
-                if(grid[i][j] instanceof NaNSlot){
-                    temp.push(Object.assign(new NaNSlot([i,j]), grid[i][j]))
-                }
-                if(grid[i][j] instanceof UnusedSlot){
-                    temp.push(Object.assign(new UnusedSlot([i,j])))
-                }
-            
-            }
-            res.push(temp)
-        }
-        console.log("empty grid", res)
-        return res
     }
 
     getShallowGrid(grid){
@@ -357,7 +211,6 @@ export default class ShipGrid extends React.Component {
                 if(grid[i][j] instanceof UnusedSlot){
                     temp.push(Object.assign(new UnusedSlot([i,j])))
                 }
-            
             }
             res.push(temp)
         }
@@ -372,20 +225,31 @@ export default class ShipGrid extends React.Component {
         return res
     }
 
-    balanceShip(){
-        if(!this.state.useSift){
-            this.performSift()
-        }  
-        else{
-            var allShallowContainer = this.getShallowAllContainers(this.state.allContainers)
-            var tempGrid = this.getShallowGrid(this.state.grid)
-            let balanceSearch = new BalanceSearch(tempGrid, allShallowContainer)
-            let [top, route] = balanceSearch.greedySearch()
-            console.log(top.grid)
-            this.setState({downloadReady: true})
-            this.setState({showRoute: true})
-            this.handleDownload(top.grid)
+    writeFinishMessageToLog(){
+        let sendData;
+        var currentdate = new Date();
+        var datetime = currentdate.getDate() + "/"
+                + (currentdate.getMonth() + 1)  + "/" 
+                + currentdate.getFullYear() + " "  
+                + (currentdate.getHours()<10 ? '0' + currentdate.getHours() : currentdate.getHours()) + ":"  
+                + (currentdate.getMinutes()<10 ? '0' + currentdate.getMinutes() : currentdate.getMinutes()) + ":" 
+                + (currentdate.getSeconds()<10 ? '0' + currentdate.getSeconds() : currentdate.getSeconds())
+
+        sendData = {
+            "logMessage"  :  datetime + " Finished a Cycle. Manifest " + this.state.manifestName.substring(0, this.state.manifestName.length - 4) + "_OUTBOUND.txt was written to desktop, and a reminder pop-up was shown to the operator to send file to captain." + '\n'
         }
+
+        axios
+            .post('http://localhost:8080/CycleLog', sendData)
+            .then((res) => { 
+                if(res.status == 200){
+                    
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                return
+        });
     }
     
     getColumnNumber(column){
@@ -427,7 +291,6 @@ export default class ShipGrid extends React.Component {
                 "], {" + this.getWeight(grid[i][j].weight)+ "}, " + this.getContainerType(grid[i][j]) + "\n"
             }
         }
-
         var jsonData = {
             manifestDataNew: res,
             manifestName: this.state.manifestName,
@@ -443,39 +306,85 @@ export default class ShipGrid extends React.Component {
     performTransfer(){
         let tempGrid = this.getShallowGrid(this.state.grid)  
         let offLoadContainers = this.getShallowAllContainers(JSON.parse(localStorage.getItem("slots")))
-        // console.log(offLoadContainers)
         let onLoadContainers = this.getShallowAllContainers(JSON.parse(localStorage.getItem("addContainers")))
-        
         let tempAllContainers = this.getShallowAllContainers(this.state.allContainers)
         let transferSearch = new TransferSearch(tempGrid, tempAllContainers, offLoadContainers, onLoadContainers)
         let [newGrid, routes] = transferSearch.greedySearch();
         this.setState({grid: newGrid.grid})
+        this.setState({route: routes})
+        this.setState({showRoute: true})
         localStorage["slots"] = JSON.stringify([])
         localStorage["addContainers"] = JSON.stringify([])
         console.log("finished greedy search")
-        // let balanceSearch = new BalanceSearch(tempGrid, tempAllContainers)
-        // let [top, route] = balanceSearch.greedySearch()
     }
+
+    handleChange(instruction){
+        // if it has crane, return
+        console.log(instruction)
+        if(instruction.includes("crane")) return;
+        var currentdate = new Date();
+        var datetime = currentdate.getDate() + "/"
+                + (currentdate.getMonth() + 1)  + "/" 
+                + currentdate.getFullYear() + " "  
+                + (currentdate.getHours()<10 ? '0' + currentdate.getHours() : currentdate.getHours()) + ":"  
+                + (currentdate.getMinutes()<10 ? '0' + currentdate.getMinutes() : currentdate.getMinutes()) + ":" 
+                + (currentdate.getSeconds()<10 ? '0' + currentdate.getSeconds() : currentdate.getSeconds())
+        
+        instruction = instruction.replace("Move", "Moved")
+        instruction = instruction.replace("\r", "") 
+        let jsonObj = {
+            "instruction" : datetime + " " + instruction + '\n',
+        }
+        axios.post('http://localhost:8080/writeInstruction', jsonObj)
+        .then((res) => { 
+            if(res.status == 200){
+                console.log("success");
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            return
+        });
+    }
+
+    finishManifest(){
+        this.writeFinishMessageToLog()
+        this.handleClose()
+        alert("Don't forget to email the manifest back to the captain")
+    }
+
+
 
     render() {
         return(
         <div className="maingrid">  
-
-        <Modal
+         <Modal
             open={this.state.open}
             onClose={this.handleClose}
             aria-labelledby="modal-modal-title"
             aria-describedby="modal-modal-description"
-            // style={{ alignItems: "center", justifyContent: "center" }}
+            style={{
+                overlay: {
+                    marginBottom: "500px"
+                }
+            }}
         >
-            <h1 className="instructionsList">{this.state.route}</h1>
-            {/* {this.state.route.map(instruction => {
-                <h1> {instruction}</h1>
-            })} */}
-        </Modal>
+            <div style ={{display: "flex"}}>
+                <div className="instructionsList">{this.state.route.map((instruction, idx) => {
+                    return <div className="instructions">
+                            <input type="radio" id={idx} onChange={() => {this.handleChange(instruction)}}/>
+                            <label > {instruction}</label>
+                        </div>
+                    })}
+                </div>
+                <div>
+                    <button style={{position:"absolute", top:"650px", right:"1065px"}} onClick={() => this.finishManifest()}>Done</button>
+                    <button style={{position:"absolute", top:"650px", right:"1000px"}} onClick={() => this.handleClose()}>Close</button>
+                </div>
+            </div>
+        </Modal>    
 
         <ManifestUpload sendManifestData={(logData, manifestFileName) => {
-            console.log("testing")
                 localStorage.clear()
                 localStorage["slots"] = JSON.stringify([])
                 localStorage["addContainers"] = JSON.stringify([])
@@ -547,11 +456,7 @@ export default class ShipGrid extends React.Component {
 
 
         {this.state.showRoute ? <button onClick={() => {this.showInstruction()}} className="showInstructionButton">Show Instructions</button>: null}
-        {/* {this.state.downloadReady ? <button onClick={() => {this.handleDownload()}} className="downloadButton">{"download"}</button>: null} */}
         {<button onClick={() => {this.performTransfer()}} className="balanceButton">Onload/Offload</button>}
-        {/* <button className="performAlgorithm" onClick={() => {
-            this.isBalanced()
-        }}>Check Balance</button> */}
         <Link to="/balanceShip">
          <button className="balance">Balance Ship</button>
     </Link>

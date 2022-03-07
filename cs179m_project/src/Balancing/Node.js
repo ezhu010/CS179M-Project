@@ -176,6 +176,14 @@ export default class Node {
         return res;
     }
 
+    twoDigs(num){
+        if(num < 10){
+            return "0" + num
+        }else{
+            return num
+        }
+    }
+
     traceBackRoot() {
         let route = this.findRouteFromRoot()
         let craneX = 9, craneY = 1;
@@ -184,18 +192,18 @@ export default class Node {
             let contianerMoved = route[i].findContainerMoved(route[i + 1])
             // crane movement
             if(craneX !== contianerMoved[0].row  + 1 || craneY !== contianerMoved[0].column + 1)
-            res.push("Move crane from ["+ craneX +", " + craneY +
-             "] to ["+ contianerMoved[0].row  + 1 + ", " + contianerMoved[0].column + 1 +  "]")
+            res.push("Move crane from ["+ this.twoDigs(craneX) +", " + this.twoDigs(craneY) +
+             "] to ["+ this.twoDigs((Number(contianerMoved[0].row)  + 1)) + ", " + this.twoDigs((Number(contianerMoved[0].column) + 1)) +  "]")
             // container movement
-            res.push("Move container " + contianerMoved[0].name +  
-            " from [" + contianerMoved[0].row + 1 + ", " + contianerMoved[0].column + 1 + "] to [" +
-            contianerMoved[1].row + 1 + ", " + contianerMoved[1].column + 1 + "]")
+            res.push("Move " + '"' + contianerMoved[0].name + '"' + 
+            " from [" + this.twoDigs(contianerMoved[0].row + 1) + ", " + this.twoDigs(contianerMoved[0].column + 1) + "] to [" +
+            this.twoDigs(contianerMoved[1].row + 1) + ", " + this.twoDigs(contianerMoved[1].column + 1) + "]")
             craneX = contianerMoved[1].row + 1;
             craneY = contianerMoved[1].column + 1;
         }
         // Reset crane position at the end
-        res.push("Move crane from [" + craneX +  ", " + craneY + 
-             "] to [ 9 , 1 ]")
+        res.push("Move crane from [" + this.twoDigs(craneX) +  ", " + this.twoDigs(craneY) + 
+             "] to [ 09 , 01 ]")
         return res
     }
 

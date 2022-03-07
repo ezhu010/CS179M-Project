@@ -42,20 +42,45 @@ next()
   res.sendStatus(200)
 });
 
-//For log after manifest is uploaded
-// app.post("/manifestLogWrite", (req, res, next) => {
-//   fs.appendFile('../cs179m_project/Logs/log.txt', req.body.logData, err => {
-//     if (err) {
-//       console.error(err)
-//       return
-//     }
-//   })
-//   next()
-// }, 
-//   function(req, res, next) {
-//     res.sendStatus(200)
-//   }
-// );
+app.post("/CycleLog", (req, res, next) => {
+  fs.appendFile('../cs179m_project/Logs/log.txt', req.body.logMessage, err => {
+    if (err) {
+      console.error(err)
+      return
+    }
+  })
+next()
+}, function(req, res, next) {
+  res.sendStatus(200)
+});
+
+app.post("/writeInstruction", (req, res, next) => {
+  fs.appendFile('../cs179m_project/Logs/log.txt', req.body.instruction, err => {
+    if (err) {
+      console.error(err)
+      return
+    }
+  })
+next()
+}, function(req, res, next) {
+  res.sendStatus(200)
+});
+
+
+// For log after manifest is uploaded
+app.post("/manifestLogWrite", (req, res, next) => {
+  fs.appendFile('../cs179m_project/Logs/log.txt', req.body.logData, err => {
+    if (err) {
+      console.error(err)
+      return
+    }
+  })
+  next()
+}, 
+  function(req, res, next) {
+    res.sendStatus(200)
+  }
+);
 
 
 const PORT = process.env.PORT || 8080;

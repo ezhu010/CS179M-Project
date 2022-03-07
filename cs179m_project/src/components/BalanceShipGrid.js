@@ -40,7 +40,7 @@ export default class BalanceShipGrid extends React.Component {
             useSift: false,
             downloadReady: false,
             showRoute: false, 
-            route: "",
+            route: [],
             open: false,
             manifestDataNew: ""
         }
@@ -53,6 +53,7 @@ export default class BalanceShipGrid extends React.Component {
     }
 
     handleOpen(){
+        console.log(this.state.route)
         this.setState({open: true})
     }
 
@@ -108,8 +109,14 @@ export default class BalanceShipGrid extends React.Component {
                 tmp = []
             }
         })
-            console.log(this.state.manifestName)
-            var sendData = `Manifest ${this.state.manifestName} is opened, there are ${containerCount} containers on the ship\n`
+        var currentdate = new Date();
+        var datetime = currentdate.getDate() + "/"
+                + (currentdate.getMonth() + 1)  + "/" 
+                + currentdate.getFullYear() + " "  
+                + (currentdate.getHours()<10 ? '0' + currentdate.getHours() : currentdate.getHours()) + ":"  
+                + (currentdate.getMinutes()<10 ? '0' + currentdate.getMinutes() : currentdate.getMinutes()) + ":" 
+                + (currentdate.getSeconds()<10 ? '0' + currentdate.getSeconds() : currentdate.getSeconds())
+            var sendData = `${datetime} Manifest ${this.state.manifestName} is opened, there are ${containerCount} containers on the ship\n`
             var manifestInfo = {}
             manifestInfo.logData = sendData        
             axios
@@ -292,18 +299,15 @@ export default class BalanceShipGrid extends React.Component {
             }
             instructionsList.push({"startPos": startPos, "endPos": endPos, "containerName": sortedList[i].name, "grid": this.state.grid, "weight": sortedList[i].weight })
         }
-        // console.log(instructionsList)
         var siftGrid = this.getEmptySiftGrid(this.state.grid)
         // populate all containers list
         var siftAllContainers = []
         for(var i = 0; i < instructionsList.length; i++) {
             let item = instructionsList[i]
-            // console.log(item);
             let newCnt = new ContainerSlot([item.endPos[0] - 1, item.endPos[1] - 1], item.weight, item.containerName)
             siftAllContainers.push(newCnt)
         }
         // loop through instruction list and populate siftGrid
-        
         
         for(var i = 0; i < instructionsList.length; i++){
             let item = instructionsList[i]
@@ -318,7 +322,7 @@ export default class BalanceShipGrid extends React.Component {
         this.setState({grid: top.grid})
         this.setState({downloadReady: true})
         this.setState({showRoute: true})
-        this.handleDownload(top.grid)
+        this.handleDownload(top.grid)  
     }
 
     getEmptySiftGrid(grid){
@@ -383,11 +387,45 @@ export default class BalanceShipGrid extends React.Component {
             let [top, route] = balanceSearch.greedySearch()
             console.log(top.grid)
             console.log(route)
+            this.setState({route: route})
             this.setState({grid: top.grid})
             this.setState({downloadReady: true})
             this.setState({showRoute: true})
             this.handleDownload(top.grid)
         }
+    }
+    
+    writeFinishMessageToLog(siftBool){
+        let sendData;
+        var currentdate = new Date();
+        var datetime = currentdate.getDate() + "/"
+                + (currentdate.getMonth() + 1)  + "/" 
+                + currentdate.getFullYear() + " "  
+                + (currentdate.getHours()<10 ? '0' + currentdate.getHours() : currentdate.getHours()) + ":"  
+                + (currentdate.getMinutes()<10 ? '0' + currentdate.getMinutes() : currentdate.getMinutes()) + ":" 
+                + (currentdate.getSeconds()<10 ? '0' + currentdate.getSeconds() : currentdate.getSeconds())
+        if (siftBool){
+            sendData = {
+                "logMessage"  :  datetime + " Finished balancing via SIFT. Manifest " + this.state.manifestNamesubstring(0, this.state.manifestName.length - 4) + "_OUTBOUND.txt was written to desktop, and a reminder pop-up was shown to the operator to send file to captain." + '\n'
+            }
+        }
+        else {
+            sendData = {
+                "logMessage"  :  datetime + " Finished balancing. Manifest " + this.state.manifestName.substring(0, this.state.manifestName.length - 4) + "_OUTBOUND.txt was written to desktop, and a reminder pop-up was shown to the operator to send file to captain." + '\n'
+            }
+        }
+
+        axios
+            .post('http://localhost:8080/CycleLog', sendData)
+            .then((res) => { 
+                if(res.status == 200){
+                    // window.location.href="/";
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                return
+        });
     }
     
     getColumnNumber(column){
@@ -421,7 +459,6 @@ export default class BalanceShipGrid extends React.Component {
     }
 
     handleDownload(grid){
-        console.log(grid)
         var res = ""
         for(var i = 0; i < grid.length; i++) {
             for(var j = 0;  j < grid[0].length; j++) {
@@ -442,6 +479,43 @@ export default class BalanceShipGrid extends React.Component {
         this.handleOpen()
     }
 
+    handleChange(instruction){
+        // if it has crane, return
+        console.log(instruction)
+        if(instruction.includes("crane")) return;
+        var currentdate = new Date();
+        var datetime = currentdate.getDate() + "/"
+                + (currentdate.getMonth() + 1)  + "/" 
+                + currentdate.getFullYear() + " "  
+                + (currentdate.getHours()<10 ? '0' + currentdate.getHours() : currentdate.getHours()) + ":"  
+                + (currentdate.getMinutes()<10 ? '0' + currentdate.getMinutes() : currentdate.getMinutes()) + ":" 
+                + (currentdate.getSeconds()<10 ? '0' + currentdate.getSeconds() : currentdate.getSeconds())
+        
+        instruction = instruction.replace("Move", "Moved")
+        instruction = instruction.replace("\r", "") 
+        let jsonObj = {
+            "instruction" : datetime + " " + instruction + '\n',
+        }
+        axios.post('http://localhost:8080/writeInstruction', jsonObj)
+        .then((res) => { 
+            if(res.status == 200){
+                console.log("success");
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            return
+        });
+            console.log(instruction)
+    }
+
+    finishManifest(){
+        // console.log(!this.state.useSift)
+        this.writeFinishMessageToLog(!this.state.useSift)
+        this.handleClose()
+        alert("Don't forget to email the manifest back to the captain")
+    }
+
     render() {
         return(
         <div className="maingrid">  
@@ -451,13 +525,26 @@ export default class BalanceShipGrid extends React.Component {
             onClose={this.handleClose}
             aria-labelledby="modal-modal-title"
             aria-describedby="modal-modal-description"
-            // style={{ alignItems: "center", justifyContent: "center" }}
+            style={{
+                overlay: {
+                    marginBottom: "500px"
+                }
+            }}
         >
-            <h1 className="instructionsList">{this.state.route}</h1>
-            {/* {this.state.route.map(instruction => {
-                <h1> {instruction}</h1>
-            })} */}
-        </Modal>
+            <div style ={{display: "flex"}}>
+                <div className="instructionsList">{this.state.route.map((instruction, idx) => {
+                    return <div className="instructions">
+                            <input type="radio" id={idx} onChange={() => {this.handleChange(instruction)}}/>
+                            <label > {instruction}</label>
+                        </div>
+                    })}
+                </div>
+                <div>
+                    <button style={{position:"absolute", top:"850px", right:"1265px"}} onClick={() => this.finishManifest()}>Done</button>
+                    <button style={{position:"absolute", top:"850px", right:"1200px"}} onClick={() => this.handleClose()}>Close</button>
+                </div>
+            </div>
+        </Modal>    
 
         <ManifestUpload sendManifestData={(logData, manifestFileName) => {
             console.log("testing")
@@ -523,10 +610,8 @@ export default class BalanceShipGrid extends React.Component {
                 filename= {this.state.manifestName.substring(0, this.state.manifestName.length - 4) + "_OUTBOUND.txt"}
                 exportFile={() => this.state.manifestDataNew}
                     />:null}
-        {/* {this.state.downloadReady ? <a href='../../../backend/finalManifest/test.txt' className="downloadButton" download>Click to download</a>: null} */}
 
         {this.state.showRoute ? <button onClick={() => {this.showInstruction()}} className="showInstructionButton">Show Instructions</button>: null}
-        {/* {this.state.downloadReady ? <button onClick={() => {this.handleDownload()}} className="downloadButton">{"download"}</button>: null} */}
         {!this.state.isShipBalanced ? <button onClick={() => {this.balanceShip()}} className="balanceButton">{!this.state.useSift ? "SIFT" : "Balance Ship"}</button>: null}
         <button className="performAlgorithm" onClick={() => {
             this.isBalanced()

@@ -7,12 +7,13 @@ const LogForm = () => {
         var name = event.target.name.value
         // var clockStatus = event.target.clockStatus.value
         var currentdate = new Date();
-        var datetime = name + " " + "Clocked In"  +  " at " + currentdate.getDate() + "/"
+        var datetime = currentdate.getDate() + "/"
                 + (currentdate.getMonth() + 1)  + "/" 
-                + currentdate.getFullYear() + " @ "  
+                + currentdate.getFullYear() + " "  
                 + (currentdate.getHours()<10 ? '0' + currentdate.getHours() : currentdate.getHours()) + ":"  
                 + (currentdate.getMinutes()<10 ? '0' + currentdate.getMinutes() : currentdate.getMinutes()) + ":" 
                 + (currentdate.getSeconds()<10 ? '0' + currentdate.getSeconds() : currentdate.getSeconds())
+                +  " " + name + " " + "Clocked In"  
         var sendData = {
             "datetime"  :  datetime + '\n'
         }
