@@ -1,6 +1,19 @@
-8/3/2022 21:09:18 Manifest ShipCase3.txt is opened, there are 6 containers on the ship
-8/3/2022 21:09:35 Manifest ShipCase3.txt is opened, there are 6 containers on the ship
-8/3/2022 21:09:55 Manifest ShipCase3.txt is opened, there are 6 containers on the ship
-8/3/2022 21:16:06 Manifest ShipCase3.txt is opened, there are 6 containers on the ship
-8/3/2022 21:39:30 Manifest ShipCase3.txt is opened, there are 6 containers on the ship
-8/3/2022 21:39:49 Manifest ShipCase3.txt is opened, there are 6 containers on the ship
+9/3/2022 15:44:47 Manifest ShipCase1.txt is opened, there are 2 containers on the ship
+9/3/2022 15:46:20 Manifest ShipCase1.txt is opened, there are 2 containers on the ship
+9/3/2022 15:47:23 Manifest ShipCase1.txt is opened, there are 2 containers on the ship
+9/3/2022 15:48:40 Manifest ShipCase1.txt is opened, there are 2 containers on the ship
+9/3/2022 15:48:52 Manifest ShipCase1.txt is opened, there are 2 containers on the ship
+9/3/2022 15:49:09 Manifest ShipCase1.txt is opened, there are 2 containers on the ship
+9/3/2022 15:49:14 Manifest ShipCase1.txt is opened, there are 2 containers on the ship
+9/3/2022 15:49:40 Manifest ShipCase1.txt is opened, there are 2 containers on the ship
+9/3/2022 15:49:46 Manifest ShipCase1.txt is opened, there are 2 containers on the ship
+9/3/2022 15:50:08 Moved "Cat" from [01, 02] to the truck zone
+9/3/2022 15:51:49 Manifest ShipCase1.txt is opened, there are 2 containers on the ship
+9/3/2022 15:51:58 Moved "Cat" from [01, 02] to the truck zone
+9/3/2022 15:52:01 Moved "Dog" from [01, 03] to the truck zone
+9/3/2022 15:52:03 Finished a Cycle. Manifest ShipCase1_OUTBOUND.txt was written to desktop, and a reminder pop-up was shown to the operator to send file to captain.
+9/3/2022 15:52:52 Manifest ShipCase1.txt is opened, there are 2 containers on the ship
+9/3/2022 15:53:01 Manifest ShipCase1.txt is opened, there are 2 containers on the ship
+9/3/2022 15:53:37 Manifest ShipCase1.txt is opened, there are 2 containers on the ship
+9/3/2022 15:53:47 Manifest ShipCase1.txt is opened, there are 2 containers on the ship
+9/3/2022 15:54:21 Manifest ShipCase1.txt is opened, there are 2 containers on the ship

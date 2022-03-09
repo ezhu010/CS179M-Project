@@ -101,6 +101,9 @@ class AddContainerList extends Component {
                     onClose={this.handleClose}
                     aria-labelledby="modal-modal-title"
                     aria-describedby="modal-modal-description"
+                    style={{
+                        background: "rgba(240, 248, 255, 0.9)",
+                    }}
                 >
                    <MaterialUIFormSubmit
                         formName="Add Container Form"
@@ -129,7 +132,7 @@ class AddContainerList extends Component {
                         </List>
                     </Grid>
                 </Box>
-                <Button className="addContainerButton" onClick={()=>{this.handleOpen()}}>Add Container</Button>
+                <Button className="addContainerButton ButtonLayout" onClick={()=>{this.handleOpen()}}>Add Container</Button>
             </div>
         )
     }

@@ -18,6 +18,7 @@ import Sift from "../Balancing/Sift"
 import Modal from '@mui/material/Modal';
 import DownloadLink from "react-download-link";
 import TransferSearch from "../Transfer/TransferSearch.js";
+import LogForm from "./LogForm.js";
 
 
 export default class ShipGrid extends React.Component {
@@ -31,7 +32,7 @@ export default class ShipGrid extends React.Component {
             data: null,
             row: 0,
             column: 0,
-            CELLSIZE: 95,
+            CELLSIZE: 90,
             clickedContainer: false, 
             showGrid: false,
             isfileUploaded: false,
@@ -45,12 +46,24 @@ export default class ShipGrid extends React.Component {
             open: false,
             openComment: false,
             manifestDataNew: "",
-            comment: ""
+            comment: "",
+            openLogForm: false
         }
         this.handleOpen = this.handleOpen.bind(this);
         this.handleOpenComment = this.handleOpenComment.bind(this);
         this.handleClose = this.handleClose.bind(this);
         this.handleCloseComment = this.handleCloseComment.bind(this);
+        this.handleOpenLog = this.handleOpenLog.bind(this);
+        this.handleCloseLog = this.handleCloseLog.bind(this)
+    }
+
+    handleOpenLog(){
+        console.log('open here');
+        this.setState({openLogForm: true})
+    }
+
+    handleCloseLog(){
+        this.setState({openLogForm: false})
     }
 
     handleClose(){
@@ -328,15 +341,17 @@ export default class ShipGrid extends React.Component {
         this.setState({grid: newGrid.grid})
         this.setState({route: routes})
         this.setState({showRoute: true})
+        this.setState({downloadReady: true})
         localStorage["slots"] = JSON.stringify([])
         localStorage["addContainers"] = JSON.stringify([])
+        this.handleDownload(newGrid.grid)
         console.log("finished greedy search")
     }
 
     handleChange(instruction, idx, event){
         console.log("index ", idx);
         this.setState({routeChecked:
-            this.state.routeChecked.add(instruction)
+            this.state.routeChecked.add(idx)
         })
         console.log("route check ", this.state.routeChecked)
         if(instruction.includes("crane")) return;
@@ -414,15 +429,17 @@ export default class ShipGrid extends React.Component {
             onClose={this.handleCloseComment}
             aria-labelledby="modal-modal-title"
             aria-describedby="modal-modal-description"
-            style={{
+            style={
+                {
+                background: "rgba(240, 248, 255, 0.9)",
                 overlay: {
-                    marginBottom: "500px"
+                    marginBottom: "500px",
                 }
-            }} 
+            }}
         >
             <div className="logComment">
                     <input style={{"height":40, "width":300, "font-size": 16}} type="text" value={this.state.comment} onChange={event => this.getComment(event)} />
-                    <button style={{"display":"block"}}onClick={() => this.submitComment()}>Comment</button>
+                    <button className="ButtonLayout" style={{"display":"block"}}onClick={() => this.submitComment()}>Comment</button>
             </div>
         </Modal>
          <Modal
@@ -431,22 +448,40 @@ export default class ShipGrid extends React.Component {
             aria-labelledby="modal-modal-title"
             aria-describedby="modal-modal-description"
             style={{
+                background: "rgba(240, 248, 255, 0.9)",
                 overlay: {
-                    marginBottom: "500px"
+                    marginBottom: "700px"
                 }
             }}
         >
             <div style ={{display: "flex"}}>
                 <div className="instructionsList">{this.state.route.map((instruction, idx) => {
                     return <div className="instructions">
-                            <input type="radio"  id={"blah"} checked={this.state.routeChecked.has(instruction)} onChange={(event) => {this.handleChange(instruction, idx, event)}}/>
+                            <input type="radio" id={instruction} checked={this.state.routeChecked.has(idx)} onChange={(event) => {this.handleChange(instruction, idx, event)}}/>
                             <label > {instruction}</label>
                         </div>
                     })}
                 </div>
                 <div>
-                    <button style={{position:"absolute", top:"650px", right:"1065px"}} onClick={() => this.finishManifest()}>Done</button>
-                    <button style={{position:"absolute", top:"650px", right:"1000px"}} onClick={() => this.handleClose()}>Close</button>
+                    {this.state.route.length === this.state.routeChecked.size? 
+                     <DownloadLink
+                className="downloadButton ButtonLayout"
+                style={{
+                    "color":"white",
+                    "text-decoration":"none",
+                    "height": "18px"
+                }}
+                label="Save"
+                filename= {this.state.manifestName.substring(0, this.state.manifestName.length - 4) + "_OUTBOUND.txt"}
+                exportFile={() => 
+                    {
+                    this.finishManifest()
+                    return this.state.manifestDataNew
+                    }
+                }
+                    />
+                    : null}
+                    <button className="ButtonLayout" style={{position:"absolute", top:"900px", right:"1120px"}} onClick={() => this.handleClose()}>Close</button>
                 </div>
             </div>
         </Modal>    
@@ -464,15 +499,15 @@ export default class ShipGrid extends React.Component {
                 this.setState({manifestName: manifestFileName})
         }}
         />
-        
+        <div style={{"left": "100px"}}>
          { this.state.isfileUploaded ?
             this.state.grid.map(rowOfSlots => 
                 rowOfSlots.map(slot => {
                     if(slot instanceof  NaNSlot){
                         return (
                             <div  className="NaNSlot" style={{
-                                left: `${this.state.CELLSIZE * slot.column + 1}px`,
-                                top: `${this.state.CELLSIZE * (7 - slot.row) + 1}px`,
+                                left: `${this.state.CELLSIZE * slot.column + 160}px`,
+                                top: `${this.state.CELLSIZE * (7 - slot.row) + 20}px`,
                                 width: `${this.state.CELLSIZE - 1}px`,
                                 height: `${this.state.CELLSIZE - 1}px`,
                                 }} key={(slot.row) * 12 + (slot.column)} id={(slot.row) * 12 + (slot.column)}>NAN
@@ -482,8 +517,8 @@ export default class ShipGrid extends React.Component {
                     else if(slot instanceof UnusedSlot){
                         return(
                             <div  className="UnusedSlot" style={{
-                                left: `${this.state.CELLSIZE * slot.column + 1}px`,
-                                top: `${this.state.CELLSIZE * (7 - slot.row) + 1}px`,
+                                left: `${this.state.CELLSIZE * slot.column + 160}px`,
+                                top: `${this.state.CELLSIZE * (7 - slot.row) + 20}px`,
                                 width: `${this.state.CELLSIZE - 1}px`,
                                 height: `${this.state.CELLSIZE - 1}px`,
                                 }} key={(slot.row) * 12 + (slot.column)} id={(slot.row) * 12 + (slot.column)}> UNUSED
@@ -495,8 +530,8 @@ export default class ShipGrid extends React.Component {
                            <ToolTip title={<Typography fontSize={20}>{slot.name}</Typography>}>
                                 <div onClick={() => this.addToRemoveContainerList(slot)}
                                         className="ContainerSlot" style={{
-                                        left: `${this.state.CELLSIZE * slot.column + 1}px`,
-                                        top: `${this.state.CELLSIZE * (7 - slot.row) + 1}px`,
+                                        left: `${this.state.CELLSIZE * slot.column + 160}px`,
+                                        top: `${this.state.CELLSIZE * (7 - slot.row) + 20}px`,
                                         width: `${this.state.CELLSIZE - 1}px`,
                                         height: `${this.state.CELLSIZE - 1}px`,
                                         }} key={(slot.row) * 12 + (slot.column)} id={(slot.row) * 12 + (slot.column)}> {slot.name}
@@ -507,31 +542,39 @@ export default class ShipGrid extends React.Component {
                 })
             ) : null
         } 
-        {this.state.downloadReady ? 
-            <DownloadLink
-                className="downloadButton"
-                label="Save"
-                filename= {this.state.manifestName.substring(0, this.state.manifestName.length - 4) + "_OUTBOUND.txt"}
-                exportFile={() => this.state.manifestDataNew}
-                    />:null}
-        {/* {this.state.downloadReady ? <a href='../../../backend/finalManifest/test.txt' className="downloadButton" download>Click to download</a>: null} */}
-
+        </div>
+       
 
         <RemoveContainerList clickedContainer={this.state.clickedContainer} isfileUploaded={this.state.isfileUploaded}/>
         <AddContainerList isfileUploaded={this.state.isfileUploaded}/>
 
-
-        <button onClick={() => {this.handleOpenComment()}} className="commentOperator"> Operator Comment</button>
-        {this.state.showRoute ? <button onClick={() => {this.showInstruction()}} className="showInstructionButton">Show Instructions</button>: null}
-        {<button onClick={() => {this.performTransfer()}} className="balanceButton">Onload/Offload</button>}
+        <button onClick={() => this.handleOpenLog()} className="logform ButtonLayout" type="button">Log Form</button>
+        <button onClick={() => {this.handleOpenComment()}} className="commentOperator ButtonLayout"> Operator Comment</button>
+        {this.state.showRoute ? <button onClick={() => {this.showInstruction()}} className="showInstructionButtonOnload ButtonLayout">Show Instructions</button>: null}
+        {<button onClick={() => {this.performTransfer()}} className="OnloadButton ButtonLayout">Onload/Offload</button>}
         <Link to="/balanceShip">
-         <button className="balance">Balance Ship</button>
-    </Link>
+         <button className="balance ButtonLayout">Balance Ship Page</button>
+        </Link>
+        <Outlet />
         <div className="logform">            
-            <Link to="/logform">
-                <button type="button">Log Form</button>
-            </Link>
-            <Outlet />
+            <Modal 
+            open={this.state.openLogForm}
+            onClose={this.handleCloseLog}
+            aria-labelledby="modal-modal-title"
+            aria-describedby="modal-modal-description"
+            style={
+                {
+                background: "rgba(240, 248, 255, 0.9)",
+                overlay: {
+                    marginTop: "500px",
+                }
+            }}
+            >
+                <div className="logComment">
+                <LogForm/>
+                </div>
+            </Modal>
+            
         </div>
     </div>
         );

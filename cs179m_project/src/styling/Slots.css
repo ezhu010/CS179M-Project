@@ -4,6 +4,18 @@
   justify-content: center;
   align-items: center;
 }
+
+::-webkit-file-upload-button {
+  background-color: black;
+  color: white;
+  font-size: small;
+  padding: 10px 60px;
+  border-radius: 5px;
+  margin: 10px 0px;
+  cursor: pointer;
+  letter-spacing: 1px;
+}
+
 .row {
   display: flex;
   flex-direction: row;
@@ -71,15 +83,37 @@
   position: absolute;
   margin-left: auto;
   margin-right: auto;
-  left: 730px;
-  bottom: 161px;
+  left: 670px;
+  bottom: 140px;
 }
 
 .performAlgorithm {
   position: absolute;
   margin-left: auto;
   margin-right: auto;
-  left: 620px;
+  left: 520px;
+  bottom: 81px;
+}
+.ButtonLayout {
+  background-color: black !important;
+  color: white !important;
+  font-size: small !important;
+  padding: 10px 60px !important;
+  border-radius: 5px !important;
+  margin: 10px 0px !important;
+  cursor: pointer !important;
+  letter-spacing: 1px !important;
+}
+
+.addContainerButton {
+  left: 1490px;
+}
+
+.OnloadButton {
+  position: absolute;
+  margin-left: auto;
+  margin-right: auto;
+  left: 520px;
   bottom: 81px;
 }
 
@@ -87,8 +121,16 @@
   position: absolute;
   margin-left: auto;
   margin-right: auto;
-  left: 900px;
-  bottom: 81px;
+  left: 406px;
+  bottom: 140px;
+}
+
+.onLoadPage {
+  position: absolute;
+  margin-left: auto;
+  margin-right: auto;
+  left: 400px;
+  bottom: 140px;
 }
 
 .balanceButton {
@@ -115,20 +157,28 @@
   bottom: 81px;
 }
 
+.showInstructionButtonOnload {
+  position: absolute;
+  margin-left: auto;
+  margin-right: auto;
+  left: 630px;
+  bottom: 30px;
+}
+
 .downloadButton {
   position: absolute;
   margin-left: auto;
   margin-right: auto;
-  left: 250px;
-  bottom: 81px;
+  top: 900px;
+  right: 1306px;
 }
 
 .manifestupload {
   position: absolute;
   margin-left: auto;
   margin-right: auto;
-  left: 830px;
-  bottom: 161px;
+  left: 870px;
+  bottom: 140px;
 }
 
 .instructionsList {

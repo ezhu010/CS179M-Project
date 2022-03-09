@@ -34,10 +34,9 @@ const LogForm = () => {
     <div> 
         <form action="" method="post"  onSubmit={handleClockIn}>
             <label>
-                Name:
-                <input type="text" name="name" required />
+                <input type="text" name="name" placeholder="Employee name" style={{"height": "30px", width: "110%"}} required />
             </label>
-            <input type="Submit" value="Clock In" />
+            <input type="Submit" style={{"display": "block"}} className="ButtonLayout" value="Clock In" />
         </form>
     </div> 
     );

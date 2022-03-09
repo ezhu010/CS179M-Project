@@ -9,7 +9,7 @@ import RemoveContainerList from "./RemoveContainerList.js";
 import AddContainerList from "./AddContainerList";
 import ManifestUpload from "./ManifestUpload.js";
 import axios from 'axios';
-
+import LogForm from "./LogForm.js";
 import React from "react";
 import "../styling/Slots.css"
 import Node from "../Balancing/Node"
@@ -41,15 +41,31 @@ export default class BalanceShipGrid extends React.Component {
             downloadReady: false,
             showRoute: false, 
             route: [],
+            routeChecked: new Set(),
             open: false,
+            openComment: false,
+            openLogForm: false,
             manifestDataNew: "",
             comment: ""
         }
         this.handleOpen = this.handleOpen.bind(this);
         this.handleOpenComment = this.handleOpenComment.bind(this);
+        this.handleCloseComment = this.handleCloseComment.bind(this);
         this.handleOpen = this.handleOpen.bind(this);
         this.handleClose = this.handleClose.bind(this);
+        this.handleOpenLog = this.handleOpenLog.bind(this)
+        this.handleCloseLog = this.handleCloseLog.bind(this)
     }
+
+    handleOpenLog(){
+        this.setState({openLogForm: true})
+    }
+
+    handleCloseLog(){
+        this.setState({openLogForm: false})
+    }
+
+    
 
     handleClose(){
         this.setState({open: false})
@@ -489,8 +505,11 @@ export default class BalanceShipGrid extends React.Component {
         this.handleOpen()
     }
 
-    handleChange(instruction){
+    handleChange(instruction, idx, event){
         // if it has crane, return
+        this.setState({routeChecked:
+            this.state.routeChecked.add(idx)
+        })
         console.log(instruction)
         if(instruction.includes("crane")) return;
         var currentdate = new Date();
@@ -562,21 +581,21 @@ export default class BalanceShipGrid extends React.Component {
     render() {
         return(
         <div className="maingrid">  
-
-              <Modal 
-        open={this.state.openComment}
+        <Modal 
+            open={this.state.openComment}
             onClose={this.handleCloseComment}
             aria-labelledby="modal-modal-title"
             aria-describedby="modal-modal-description"
             style={{
+                background: "rgba(240, 248, 255, 0.9)",
                 overlay: {
-                    marginBottom: "500px"
+                    marginBottom: "500px",
                 }
             }} 
         >
             <div className="logComment">
                     <input style={{"height":40, "width":300, "font-size": 16}} type="text" value={this.state.comment} onChange={event => this.getComment(event)} />
-                    <button style={{"display":"block"}}onClick={() => this.submitComment()}>Comment</button>
+                    <button style={{"display":"block"}} className="ButtonLayout" onClick={() => this.submitComment()}>Comment</button>
             </div>
         </Modal>
 
@@ -628,8 +647,8 @@ export default class BalanceShipGrid extends React.Component {
                     if(slot instanceof  NaNSlot){
                         return (
                             <div  className="NaNSlot" style={{
-                                left: `${this.state.CELLSIZE * slot.column + 1}px`,
-                                top: `${this.state.CELLSIZE * (7 - slot.row) + 1}px`,
+                                left: `${this.state.CELLSIZE * slot.column + 160}px`,
+                                top: `${this.state.CELLSIZE * (7 - slot.row) + 20}px`,
                                 width: `${this.state.CELLSIZE - 1}px`,
                                 height: `${this.state.CELLSIZE - 1}px`,
                                 }} key={(slot.row) * 12 + (slot.column)} id={(slot.row) * 12 + (slot.column)}>NAN
@@ -639,8 +658,8 @@ export default class BalanceShipGrid extends React.Component {
                     else if(slot instanceof UnusedSlot){
                         return(
                             <div  className="UnusedSlot" style={{
-                                left: `${this.state.CELLSIZE * slot.column + 1}px`,
-                                top: `${this.state.CELLSIZE * (7 - slot.row) + 1}px`,
+                                left: `${this.state.CELLSIZE * slot.column + 160}px`,
+                                top: `${this.state.CELLSIZE * (7 - slot.row) + 20}px`,
                                 width: `${this.state.CELLSIZE - 1}px`,
                                 height: `${this.state.CELLSIZE - 1}px`,
                                 }} key={(slot.row) * 12 + (slot.column)} id={(slot.row) * 12 + (slot.column)}> UNUSED
@@ -652,8 +671,8 @@ export default class BalanceShipGrid extends React.Component {
                            <ToolTip title={<Typography fontSize={20}>{slot.name}</Typography>}>
                                 <div
                                         className="ContainerSlot" style={{
-                                        left: `${this.state.CELLSIZE * slot.column + 1}px`,
-                                        top: `${this.state.CELLSIZE * (7 - slot.row) + 1}px`,
+                                        left: `${this.state.CELLSIZE * slot.column + 160}px`,
+                                        top: `${this.state.CELLSIZE * (7 - slot.row) + 20}px`,
                                         width: `${this.state.CELLSIZE - 1}px`,
                                         height: `${this.state.CELLSIZE - 1}px`,
                                         }} key={(slot.row) * 12 + (slot.column)} id={(slot.row) * 12 + (slot.column)}> {slot.name}
@@ -671,20 +690,35 @@ export default class BalanceShipGrid extends React.Component {
                 filename= {this.state.manifestName.substring(0, this.state.manifestName.length - 4) + "_OUTBOUND.txt"}
                 exportFile={() => this.state.manifestDataNew}
                     />:null}
-        <button onClick={() => {this.handleOpenComment()}} className="commentOperator"> Operator Comment</button>
+        <button onClick={() => this.handleOpenLog()} className="logform ButtonLayout" type="button">Log Form</button>
+        <button onClick={() => {this.handleOpenComment()}} className="commentOperator ButtonLayout"> Operator Comment</button>
         {this.state.showRoute ? <button onClick={() => {this.showInstruction()}} className="showInstructionButton">Show Instructions</button>: null}
         {!this.state.isShipBalanced ? <button onClick={() => {this.balanceShip()}} className="balanceButton">{!this.state.useSift ? "SIFT" : "Balance Ship"}</button>: null}
-        <button className="performAlgorithm" onClick={() => {
+        <button className="performAlgorithm ButtonLayout" onClick={() => {
             this.isBalanced()
         }}>Check Balance</button>
         <Link to="/">
-         <button className="balance">Onload/Offload</button>
-    </Link>
+            <button className="onLoadPage ButtonLayout">Onload/Offload Page</button>
+        </Link>
         <div className="logform">            
-            <Link to="/logform">
-                <button type="button">Log Form</button>
-            </Link>
-            <Outlet />
+            <Modal 
+            open={this.state.openLogForm}
+            onClose={this.handleCloseLog}
+            aria-labelledby="modal-modal-title"
+            aria-describedby="modal-modal-description"
+            style={
+                {
+                background: "rgba(240, 248, 255, 0.9)",
+                overlay: {
+                    marginTop: "500px",
+                }
+            }}
+            >
+                <div className="logComment">
+                <LogForm/>
+                </div>
+            </Modal>
+            
         </div>
     </div>
         );
