@@ -73,17 +73,13 @@
   margin-right: auto;
   left: 730px;
   bottom: 161px;
-  /* top: 15%;
-  left: 5%; */
-  /* margin-top: -150px;
-  margin-left: -150px; */
 }
 
 .performAlgorithm {
   position: absolute;
   margin-left: auto;
   margin-right: auto;
-  left: 720px;
+  left: 620px;
   bottom: 81px;
 }
 
@@ -99,7 +95,7 @@
   position: absolute;
   margin-left: auto;
   margin-right: auto;
-  left: 600px;
+  left: 500px;
   bottom: 81px;
 }
 
@@ -115,7 +111,7 @@
   position: absolute;
   margin-left: auto;
   margin-right: auto;
-  left: 450px;
+  left: 350px;
   bottom: 81px;
 }
 
@@ -123,7 +119,7 @@
   position: absolute;
   margin-left: auto;
   margin-right: auto;
-  left: 350px;
+  left: 250px;
   bottom: 81px;
 }
 
@@ -146,4 +142,10 @@
 .instructions {
   font-size: x-large;
   padding-bottom: 40px;
+}
+
+.logComment {
+  position: absolute;
+  left: 650px;
+  top: 600px;
 }

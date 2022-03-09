@@ -316,28 +316,28 @@ export default class TransferNode {
     }
     
     computeHeuristic(unloadList, loadList){
-        // // calculate how many of the items in loadList have been moved to the ship
-        // let temp = 0;
-        // for(let i = 0; i < loadList.length; i++) {
-        //     for(let j = 0; j < this.allContainers.length; j++) {
-        //         if(loadList[i].name === this.allContainers[i].name)
-        //             temp++;
-        //     }
-        // }
+        // return 0;
+        // calculate how many of the items in loadList have been moved to the ship
+        let temp = 0;
+        for(let i = 0; i < loadList.length; i++) {
+            for(let j = 0; j < this.allContainers.length; j++) {
+                if(loadList[i].name === this.allContainers[j].name)
+                    temp++;
+            }
+        }
 
-        // // calculate how many of the items in uloadList have been moved off the ship
-        // let temp2 = 0;
-        // for(let i = 0; i < unloadList.length; i++) {
-        //     for(let j = 0; j < this.truckList.length; j++) {
-        //         if(unloadList[i].name === this.truckList[i].name)
-        //             temp2++;
-        //     }
-        // }
-        // let containersToSwap = loadList.length + unloadList.length;
-        // let containersSwapped = temp + temp2;
-        // // console.log("Hueristic is ", containersToSwap - containersSwapped)
-        // return (containersToSwap - containersSwapped) * 2;
-        return 0;
+        // calculate how many of the items in uloadList have been moved off the ship
+        let temp2 = 0;
+        for(let i = 0; i < unloadList.length; i++) {
+            for(let j = 0; j < this.truckList.length; j++) {
+                if(unloadList[i].name === this.truckList[j].name)
+                    temp2++;
+            }
+        }
+        let containersToSwap = loadList.length + unloadList.length;
+        let containersSwapped = temp + temp2;
+        // console.log("Hueristic is ", containersToSwap - containersSwapped)
+        return (containersToSwap - containersSwapped) * 2;
     }
 
     getContainerCoord(container){

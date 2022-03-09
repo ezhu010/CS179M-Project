@@ -1,0 +1,6 @@
+8/3/2022 21:09:18 Manifest ShipCase3.txt is opened, there are 6 containers on the ship
+8/3/2022 21:09:35 Manifest ShipCase3.txt is opened, there are 6 containers on the ship
+8/3/2022 21:09:55 Manifest ShipCase3.txt is opened, there are 6 containers on the ship
+8/3/2022 21:16:06 Manifest ShipCase3.txt is opened, there are 6 containers on the ship
+8/3/2022 21:39:30 Manifest ShipCase3.txt is opened, there are 6 containers on the ship
+8/3/2022 21:39:49 Manifest ShipCase3.txt is opened, there are 6 containers on the ship

@@ -44,7 +44,8 @@ export default class ShipGrid extends React.Component {
             routeChecked: new Set(),
             open: false,
             openComment: false,
-            manifestDataNew: ""
+            manifestDataNew: "",
+            comment: ""
         }
         this.handleOpen = this.handleOpen.bind(this);
         this.handleOpenComment = this.handleOpenComment.bind(this);
@@ -334,12 +335,6 @@ export default class ShipGrid extends React.Component {
 
     handleChange(instruction, idx, event){
         console.log("index ", idx);
-        // if(this.state.routeChecked.has(instruction)) {
-        //     console.log("here");
-        //     document.getElementById(instruction).checked = true;
-        //     this.forceUpdate()
-        // }
-        // if it has crane, return
         this.setState({routeChecked:
             this.state.routeChecked.add(instruction)
         })
@@ -376,6 +371,39 @@ export default class ShipGrid extends React.Component {
         alert("Don't forget to email the manifest back to the captain")
     }
 
+    submitComment(){
+        var currentdate = new Date();
+        var datetime = currentdate.getDate() + "/"
+                + (currentdate.getMonth() + 1)  + "/" 
+                + currentdate.getFullYear() + " "  
+                + (currentdate.getHours()<10 ? '0' + currentdate.getHours() : currentdate.getHours()) + ":"  
+                + (currentdate.getMinutes()<10 ? '0' + currentdate.getMinutes() : currentdate.getMinutes()) + ":" 
+                + (currentdate.getSeconds()<10 ? '0' + currentdate.getSeconds() : currentdate.getSeconds())
+
+        let sendData = {
+            "logMessage" : datetime + " " + this.state.comment + '\n'
+        }
+        this.setState({comment: ""})
+        this.handleCloseComment()
+        
+        axios.post('http://localhost:8080/CycleLog', sendData)
+        .then((res) => { 
+            if(res.status == 200){
+                console.log("success");
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            return
+        });
+        alert("Your comment has been logged")
+        
+    }
+    
+    getComment(event){
+        console.log(event.target.value);
+        this.setState({comment: event.target.value })
+    }
 
 
     render() {
@@ -392,7 +420,10 @@ export default class ShipGrid extends React.Component {
                 }
             }} 
         >
-            <div className="instructionsList">TODO here</div>
+            <div className="logComment">
+                    <input style={{"height":40, "width":300, "font-size": 16}} type="text" value={this.state.comment} onChange={event => this.getComment(event)} />
+                    <button style={{"display":"block"}}onClick={() => this.submitComment()}>Comment</button>
+            </div>
         </Modal>
          <Modal
             open={this.state.open}

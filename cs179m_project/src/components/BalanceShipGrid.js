@@ -42,8 +42,11 @@ export default class BalanceShipGrid extends React.Component {
             showRoute: false, 
             route: [],
             open: false,
-            manifestDataNew: ""
+            manifestDataNew: "",
+            comment: ""
         }
+        this.handleOpen = this.handleOpen.bind(this);
+        this.handleOpenComment = this.handleOpenComment.bind(this);
         this.handleOpen = this.handleOpen.bind(this);
         this.handleClose = this.handleClose.bind(this);
     }
@@ -52,10 +55,18 @@ export default class BalanceShipGrid extends React.Component {
         this.setState({open: false})
     }
 
+    handleCloseComment() {
+        this.setState({openComment: false})
+    }
     handleOpen(){
         console.log(this.state.route)
         this.setState({open: true})
     }
+
+    handleOpenComment() {
+        this.setState({openComment: true})
+    }
+
 
     componentWillMount() {
         localStorage["slots"] = JSON.stringify([])
@@ -361,7 +372,6 @@ export default class BalanceShipGrid extends React.Component {
                 if(grid[i][j] instanceof UnusedSlot){
                     temp.push(Object.assign(new UnusedSlot([i,j]), grid[i][j]))
                 }
-            
             }
             res.push(temp)
         }
@@ -515,10 +525,61 @@ export default class BalanceShipGrid extends React.Component {
         this.handleClose()
         alert("Don't forget to email the manifest back to the captain")
     }
+        submitComment(){
+        var currentdate = new Date();
+        var datetime = currentdate.getDate() + "/"
+                + (currentdate.getMonth() + 1)  + "/" 
+                + currentdate.getFullYear() + " "  
+                + (currentdate.getHours()<10 ? '0' + currentdate.getHours() : currentdate.getHours()) + ":"  
+                + (currentdate.getMinutes()<10 ? '0' + currentdate.getMinutes() : currentdate.getMinutes()) + ":" 
+                + (currentdate.getSeconds()<10 ? '0' + currentdate.getSeconds() : currentdate.getSeconds())
+
+        let sendData = {
+            "logMessage" : datetime + " " + this.state.comment + '\n'
+        }
+        this.setState({comment: ""})
+        this.handleCloseComment()
+        
+        axios.post('http://localhost:8080/CycleLog', sendData)
+        .then((res) => { 
+            if(res.status == 200){
+                console.log("success");
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            return
+        });
+        alert("Your comment has been logged")
+        
+    }
+
+    getComment(event){
+        console.log(event.target.value);
+        this.setState({comment: event.target.value })
+    }
 
     render() {
         return(
         <div className="maingrid">  
+
+              <Modal 
+        open={this.state.openComment}
+            onClose={this.handleCloseComment}
+            aria-labelledby="modal-modal-title"
+            aria-describedby="modal-modal-description"
+            style={{
+                overlay: {
+                    marginBottom: "500px"
+                }
+            }} 
+        >
+            <div className="logComment">
+                    <input style={{"height":40, "width":300, "font-size": 16}} type="text" value={this.state.comment} onChange={event => this.getComment(event)} />
+                    <button style={{"display":"block"}}onClick={() => this.submitComment()}>Comment</button>
+            </div>
+        </Modal>
+
 
         <Modal
             open={this.state.open}
@@ -610,7 +671,7 @@ export default class BalanceShipGrid extends React.Component {
                 filename= {this.state.manifestName.substring(0, this.state.manifestName.length - 4) + "_OUTBOUND.txt"}
                 exportFile={() => this.state.manifestDataNew}
                     />:null}
-
+        <button onClick={() => {this.handleOpenComment()}} className="commentOperator"> Operator Comment</button>
         {this.state.showRoute ? <button onClick={() => {this.showInstruction()}} className="showInstructionButton">Show Instructions</button>: null}
         {!this.state.isShipBalanced ? <button onClick={() => {this.balanceShip()}} className="balanceButton">{!this.state.useSift ? "SIFT" : "Balance Ship"}</button>: null}
         <button className="performAlgorithm" onClick={() => {
