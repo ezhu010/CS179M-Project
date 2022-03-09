@@ -41,19 +41,32 @@ export default class ShipGrid extends React.Component {
             downloadReady: false,
             showRoute: false, 
             route: [],
+            routeChecked: new Set(),
             open: false,
+            openComment: false,
             manifestDataNew: ""
         }
         this.handleOpen = this.handleOpen.bind(this);
+        this.handleOpenComment = this.handleOpenComment.bind(this);
         this.handleClose = this.handleClose.bind(this);
+        this.handleCloseComment = this.handleCloseComment.bind(this);
     }
 
     handleClose(){
         this.setState({open: false})
+        console.log("route check ", this.state.routeChecked)
+    }
+
+    handleCloseComment() {
+        this.setState({openComment: false})
     }
 
     handleOpen(){
-        this.setState({open: true})
+        this.setState({open: true})        
+    }
+
+    handleOpenComment() {
+        this.setState({openComment: true})
     }
 
     componentWillMount() {
@@ -319,9 +332,18 @@ export default class ShipGrid extends React.Component {
         console.log("finished greedy search")
     }
 
-    handleChange(instruction){
+    handleChange(instruction, idx, event){
+        console.log("index ", idx);
+        // if(this.state.routeChecked.has(instruction)) {
+        //     console.log("here");
+        //     document.getElementById(instruction).checked = true;
+        //     this.forceUpdate()
+        // }
         // if it has crane, return
-        console.log(instruction)
+        this.setState({routeChecked:
+            this.state.routeChecked.add(instruction)
+        })
+        console.log("route check ", this.state.routeChecked)
         if(instruction.includes("crane")) return;
         var currentdate = new Date();
         var datetime = currentdate.getDate() + "/"
@@ -358,7 +380,20 @@ export default class ShipGrid extends React.Component {
 
     render() {
         return(
-        <div className="maingrid">  
+        <div className="maingrid">
+        <Modal 
+        open={this.state.openComment}
+            onClose={this.handleCloseComment}
+            aria-labelledby="modal-modal-title"
+            aria-describedby="modal-modal-description"
+            style={{
+                overlay: {
+                    marginBottom: "500px"
+                }
+            }} 
+        >
+            <div className="instructionsList">TODO here</div>
+        </Modal>
          <Modal
             open={this.state.open}
             onClose={this.handleClose}
@@ -373,7 +408,7 @@ export default class ShipGrid extends React.Component {
             <div style ={{display: "flex"}}>
                 <div className="instructionsList">{this.state.route.map((instruction, idx) => {
                     return <div className="instructions">
-                            <input type="radio" id={idx} onChange={() => {this.handleChange(instruction)}}/>
+                            <input type="radio"  id={"blah"} checked={this.state.routeChecked.has(instruction)} onChange={(event) => {this.handleChange(instruction, idx, event)}}/>
                             <label > {instruction}</label>
                         </div>
                     })}
@@ -455,7 +490,7 @@ export default class ShipGrid extends React.Component {
         <AddContainerList isfileUploaded={this.state.isfileUploaded}/>
 
 
-
+        <button onClick={() => {this.handleOpenComment()}} className="commentOperator"> Operator Comment</button>
         {this.state.showRoute ? <button onClick={() => {this.showInstruction()}} className="showInstructionButton">Show Instructions</button>: null}
         {<button onClick={() => {this.performTransfer()}} className="balanceButton">Onload/Offload</button>}
         <Link to="/balanceShip">
