@@ -93,7 +93,7 @@ export default class TransferNode {
         this.filterContainer(tempAllContainers, hiRow, hiCol)
         tempTruckList.push(tempGrid[hiRow][hiCol])
         tempGrid[hiRow][hiCol] = new UnusedSlot([hiRow, hiCol])
-        let cost = this.cost + this.getManhattanDistance(this.cranePos[0], this.cranePos[1], hiRow, hiCol) + this.getManhattanDistance(8, 0, hiRow, hiCol) + 15
+        let cost = this.cost + this.getManhattanDistance(this.cranePos[0], this.cranePos[1], hiRow, hiCol) + this.getManhattanDistance(8, 0, hiRow, hiCol) + 2
         let newTruckNode = new TransferNode(tempGrid, tempAllContainers, cost, tempTruckList, this, [8, 0])
         return newTruckNode;
     }
@@ -115,7 +115,7 @@ export default class TransferNode {
                 }
                 let allShallowContainer = this.getShallowAllContainers(this.allContainers)
                 allShallowContainer.push(Object.assign(new ContainerSlot([lowRow, lowCol], container.weight, container.name)))
-                let cost = this.cost + 15 + this.getManhattanDistance(this.cranePos[0], this.cranePos[1], 8, 0) + this.getManhattanDistance(8, 0, lowRow, lowCol)
+                let cost = this.cost + 2 + this.getManhattanDistance(this.cranePos[0], this.cranePos[1], 8, 0) + this.getManhattanDistance(8, 0, lowRow, lowCol)
                 let newNode = new TransferNode(tempGrid, allShallowContainer, cost, tempTruckList, this, [lowRow, lowCol])
                 res.push(newNode)
             }
@@ -295,8 +295,6 @@ export default class TransferNode {
     }
 
     findContainerMoved(child) {
-        // console.log("this", this.allContainers)
-        // console.log("child", child.allContainers)
         for(let i = 0; i < this.allContainers.length; i++) {
             for(let j = 0; j < child.allContainers.length; j++)
             if(child.allContainers[j].name === this.allContainers[i].name) {
@@ -308,10 +306,7 @@ export default class TransferNode {
     }
 
     findContainerRemoved(child) {
-        // console.log("CHILD: " , child.allContainers);
-        // console.log("PARENT:" , this.allContainers);
         const results = this.allContainers.filter(({ name: id1 }) => !child.allContainers.some(({ name: id2 }) => id2 === id1));
-        // console.log(results)
         return results[0]
     }
 
@@ -321,28 +316,28 @@ export default class TransferNode {
     }
     
     computeHeuristic(unloadList, loadList){
-        // calculate how many of the items in loadList have been moved to the ship
-        let temp = 0;
-        for(let i = 0; i < loadList.length; i++) {
-            for(let j = 0; j < this.allContainers.length; j++) {
-                if(loadList[i].name === this.allContainers[i].name)
-                    temp++;
-            }
-        }
+        // // calculate how many of the items in loadList have been moved to the ship
+        // let temp = 0;
+        // for(let i = 0; i < loadList.length; i++) {
+        //     for(let j = 0; j < this.allContainers.length; j++) {
+        //         if(loadList[i].name === this.allContainers[i].name)
+        //             temp++;
+        //     }
+        // }
 
-        // calculate how many of the items in uloadList have been moved off the ship
-        let temp2 = 0;
-        for(let i = 0; i < unloadList.length; i++) {
-            for(let j = 0; j < this.truckList.length; j++) {
-                if(unloadList[i].name === this.truckList[i].name)
-                    temp2++;
-            }
-        }
-        let containersToSwap = loadList.length + unloadList.length;
-        let containersSwapped = temp + temp2;
-        // console.log("Hueristic is ", containersToSwap - containersSwapped)
-        return (containersToSwap - containersSwapped) * 15;
-        // return 0;
+        // // calculate how many of the items in uloadList have been moved off the ship
+        // let temp2 = 0;
+        // for(let i = 0; i < unloadList.length; i++) {
+        //     for(let j = 0; j < this.truckList.length; j++) {
+        //         if(unloadList[i].name === this.truckList[i].name)
+        //             temp2++;
+        //     }
+        // }
+        // let containersToSwap = loadList.length + unloadList.length;
+        // let containersSwapped = temp + temp2;
+        // // console.log("Hueristic is ", containersToSwap - containersSwapped)
+        // return (containersToSwap - containersSwapped) * 2;
+        return 0;
     }
 
     getContainerCoord(container){

@@ -7,19 +7,16 @@ export default class TransferSearch {
         this.frontier = new MinQueue(1000000, [], [], TransferNode, Uint32Array)
         this.unloadList = unloadList
         this.loadList = loadList
-
-        // console.log(unloadList);
-        console.log(loadList);
-
         this.initialNode = new TransferNode(shipGrid, allContainers, 0, this.generateTruckList())
         this.visited = []
     }
 
     greedySearch(){
-        // console.log("initialNode", this.initialNode);
+        console.log("initialNode", this.initialNode);
         console.time("search")
         var count = 0
         this.frontier.push(this.initialNode, this.initialNode.computeHeuristic(this.unloadList, this.loadList))
+        // this.frontier.push(this.initialNode, 0)
         this.visited.push(this.initialNode)
         while(this.frontier.size > 0){
             ++count
@@ -32,6 +29,7 @@ export default class TransferSearch {
             }
             
             if (top.isGoalState(this.unloadList, this.loadList)) {
+                console.log("count:", count);
                 top.returnCranePos()
                 console.log("TOP:", top)
                 var route = top.traceBackRoot();

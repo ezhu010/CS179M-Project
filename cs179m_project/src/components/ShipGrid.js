@@ -310,6 +310,7 @@ export default class ShipGrid extends React.Component {
         let tempAllContainers = this.getShallowAllContainers(this.state.allContainers)
         let transferSearch = new TransferSearch(tempGrid, tempAllContainers, offLoadContainers, onLoadContainers)
         let [newGrid, routes] = transferSearch.greedySearch();
+        console.log(newGrid)
         this.setState({grid: newGrid.grid})
         this.setState({route: routes})
         this.setState({showRoute: true})

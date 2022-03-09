@@ -239,6 +239,7 @@ export default class Node {
             count++;
         }
         return count;
+        // return 0;
     }
 
     getContainerCoord(goalState, container){
