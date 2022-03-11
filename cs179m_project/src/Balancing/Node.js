@@ -263,7 +263,6 @@ export default class Node {
                 res += this.getManhattanDistance(x, y, this.allContainers[i].row, this.allContainers[i].column)
             }
         }
-        console.log(res);
         return res;
     }
 }

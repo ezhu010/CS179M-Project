@@ -19,6 +19,7 @@ import Modal from '@mui/material/Modal';
 import DownloadLink from "react-download-link";
 import TransferSearch from "../Transfer/TransferSearch.js";
 import LogForm from "./LogForm.js";
+import { TiDivide } from "react-icons/ti";
 
 
 export default class ShipGrid extends React.Component {
@@ -47,7 +48,9 @@ export default class ShipGrid extends React.Component {
             openComment: false,
             manifestDataNew: "",
             comment: "",
-            openLogForm: false
+            openLogForm: false,
+            showMinutes: false,
+            minutes: 0,
         }
         this.handleOpen = this.handleOpen.bind(this);
         this.handleOpenComment = this.handleOpenComment.bind(this);
@@ -331,9 +334,17 @@ export default class ShipGrid extends React.Component {
     }
 
     performTransfer(){
+        if(this.state.manifestData == ""){
+            alert("Please upload a manifest")
+            return
+        }
         let tempGrid = this.getShallowGrid(this.state.grid)  
         let offLoadContainers = this.getShallowAllContainers(JSON.parse(localStorage.getItem("slots")))
         let onLoadContainers = this.getShallowAllContainers(JSON.parse(localStorage.getItem("addContainers")))
+        if(offLoadContainers.length == 0 && onLoadContainers.length == 0){
+            alert("Please select a container to offload or add a container to the ship")
+            return
+        }
         let tempAllContainers = this.getShallowAllContainers(this.state.allContainers)
         let transferSearch = new TransferSearch(tempGrid, tempAllContainers, offLoadContainers, onLoadContainers)
         let [newGrid, routes] = transferSearch.greedySearch();
@@ -345,6 +356,8 @@ export default class ShipGrid extends React.Component {
         localStorage["slots"] = JSON.stringify([])
         localStorage["addContainers"] = JSON.stringify([])
         this.handleDownload(newGrid.grid)
+        this.setState({showMinutes: true})
+        this.setState({minutes: newGrid.cost})
         console.log("finished greedy search")
     }
 
@@ -424,6 +437,17 @@ export default class ShipGrid extends React.Component {
     render() {
         return(
         <div className="maingrid">
+              {this.state.showMinutes ?  
+        <div className="TimerLayout" style={{
+            "top": "30px", 
+            "position": "absolute", 
+            "left": "10px" 
+            }} >
+        <div >Estimated Time</div>
+        <div>{this.state.minutes + " minutes"}</div> 
+        </div>
+        : null}
+
         <Modal 
         open={this.state.openComment}
             onClose={this.handleCloseComment}
@@ -458,6 +482,7 @@ export default class ShipGrid extends React.Component {
                 <div className="instructionsList">{this.state.route.map((instruction, idx) => {
                     return <div className="instructions">
                             <input type="radio" id={instruction} checked={this.state.routeChecked.has(idx)} onChange={(event) => {this.handleChange(instruction, idx, event)}}/>
+                            {" "}
                             <label > {instruction}</label>
                         </div>
                     })}

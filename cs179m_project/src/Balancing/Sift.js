@@ -11,6 +11,7 @@ export default class Sift {
 
     performSiftSearch(){
         var count = 0
+        console.time("search")
         console.log(this.goalState)
         this.frontier.push(this.initialNode, this.initialNode.computeSiftHeuristic(this.goalState))
         this.visited.push(this.initialNode)
@@ -26,6 +27,7 @@ export default class Sift {
                 let route = top.traceBackRoot()
                 top.returnCranePos()
                 console.log("TOP: ", top);
+                console.timeEnd("search")
                 return [top, route]
             }
             var children = top.generateAllChildren()

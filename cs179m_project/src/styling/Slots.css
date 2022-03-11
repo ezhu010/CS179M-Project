@@ -105,6 +105,16 @@
   letter-spacing: 1px !important;
 }
 
+.TimerLayout {
+  background-color: black !important;
+  color: white !important;
+  font-size: small !important;
+  padding: 5px 20px !important;
+  border-radius: 5px !important;
+  margin: 10px 0px !important;
+  letter-spacing: 1px !important;
+}
+
 .addContainerButton {
   left: 1490px;
 }
@@ -137,7 +147,7 @@
   position: absolute;
   margin-left: auto;
   margin-right: auto;
-  left: 500px;
+  left: 525px;
   bottom: 81px;
 }
 
@@ -153,8 +163,8 @@
   position: absolute;
   margin-left: auto;
   margin-right: auto;
-  left: 350px;
-  bottom: 81px;
+  left: 630px;
+  bottom: 30px;
 }
 
 .showInstructionButtonOnload {

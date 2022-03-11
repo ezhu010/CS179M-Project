@@ -31,7 +31,7 @@ export default class BalanceShipGrid extends React.Component {
             data: null,
             row: 0,
             column: 0,
-            CELLSIZE: 95,
+            CELLSIZE: 90,
             clickedContainer: false, 
             showGrid: false,
             isfileUploaded: false,
@@ -46,7 +46,10 @@ export default class BalanceShipGrid extends React.Component {
             openComment: false,
             openLogForm: false,
             manifestDataNew: "",
-            comment: ""
+            comment: "",
+            checkBalanceClicked: false,
+            showMinutes: false,
+            minutes: 0
         }
         this.handleOpen = this.handleOpen.bind(this);
         this.handleOpenComment = this.handleOpenComment.bind(this);
@@ -205,12 +208,16 @@ export default class BalanceShipGrid extends React.Component {
     }
 
     isBalanced(){
-        // console.log(this.state.allContainers);
+        if(this.state.manifestData == ""){
+            alert("Please upload a manifest")
+            return
+        }
         var leftSide = this.getPortSideWeight()
         var rightSide = this.getStarboardSideWeight()
         // console.log((leftSide == rightSide || (leftSide / rightSide >= 0.9 && leftSide / rightSide <= 1.1)));
         this.setState({isShipBalanced:(leftSide == rightSide || (leftSide / rightSide >= 0.9 && leftSide / rightSide <= 1.1))})
         this.setState({useSift: this.isPossibleToBalance()})
+        this.setState({checkBalanceClicked: true})
     }
     
     findMin(arr, n)
@@ -350,6 +357,8 @@ export default class BalanceShipGrid extends React.Component {
         this.setState({downloadReady: true})
         this.setState({showRoute: true})
         this.handleDownload(top.grid)  
+        this.setState({minutes: top.cost})
+        this.setState({showMinutes: true})
     }
 
     getEmptySiftGrid(grid){
@@ -418,7 +427,9 @@ export default class BalanceShipGrid extends React.Component {
             this.setState({downloadReady: true})
             this.setState({showRoute: true})
             this.handleDownload(top.grid)
+            this.setState({minutes: top.cost})
         }
+        this.setState({showMinutes: true})
     }
     
     writeFinishMessageToLog(siftBool){
@@ -432,7 +443,7 @@ export default class BalanceShipGrid extends React.Component {
                 + (currentdate.getSeconds()<10 ? '0' + currentdate.getSeconds() : currentdate.getSeconds())
         if (siftBool){
             sendData = {
-                "logMessage"  :  datetime + " Finished balancing via SIFT. Manifest " + this.state.manifestNamesubstring(0, this.state.manifestName.length - 4) + "_OUTBOUND.txt was written to desktop, and a reminder pop-up was shown to the operator to send file to captain." + '\n'
+                "logMessage"  :  datetime + " Finished balancing via SIFT. Manifest " + this.state.manifestName.substring(0, this.state.manifestName.length - 4) + "_OUTBOUND.txt was written to desktop, and a reminder pop-up was shown to the operator to send file to captain." + '\n'
             }
         }
         else {
@@ -581,6 +592,17 @@ export default class BalanceShipGrid extends React.Component {
     render() {
         return(
         <div className="maingrid">  
+        {this.state.showMinutes ?  
+        <div className="TimerLayout" style={{
+            "top": "30px", 
+            "position": "absolute", 
+            "left": "10px" 
+            }} >
+        <div >Estimated Time</div>
+        <div>{this.state.minutes + " minutes"}</div> 
+        </div>
+        : null}
+       
         <Modal 
             open={this.state.openComment}
             onClose={this.handleCloseComment}
@@ -605,23 +627,41 @@ export default class BalanceShipGrid extends React.Component {
             onClose={this.handleClose}
             aria-labelledby="modal-modal-title"
             aria-describedby="modal-modal-description"
-            style={{
+             style={{
+                background: "rgba(240, 248, 255, 0.9)",
                 overlay: {
-                    marginBottom: "500px"
+                    marginBottom: "700px"
                 }
             }}
         >
             <div style ={{display: "flex"}}>
                 <div className="instructionsList">{this.state.route.map((instruction, idx) => {
                     return <div className="instructions">
-                            <input type="radio" id={idx} onChange={() => {this.handleChange(instruction)}}/>
+                            <input type="radio" id={idx} checked={this.state.routeChecked.has(idx)} onChange={(event) => {this.handleChange(instruction, idx, event)}}/>
                             <label > {instruction}</label>
                         </div>
                     })}
                 </div>
                 <div>
-                    <button style={{position:"absolute", top:"850px", right:"1265px"}} onClick={() => this.finishManifest()}>Done</button>
-                    <button style={{position:"absolute", top:"850px", right:"1200px"}} onClick={() => this.handleClose()}>Close</button>
+                     {this.state.route.length === this.state.routeChecked.size? 
+                     <DownloadLink
+                className="downloadButton ButtonLayout"
+                style={{
+                    "color":"white",
+                    "text-decoration":"none",
+                    "height": "18px"
+                }}
+                label="Save"
+                filename= {this.state.manifestName.substring(0, this.state.manifestName.length - 4) + "_OUTBOUND.txt"}
+                exportFile={() => 
+                    {
+                    this.finishManifest()
+                    return this.state.manifestDataNew
+                    }
+                }
+                    />
+                    : null}
+                    <button className="ButtonLayout" style={{position:"absolute", top:"900px", right:"1120px"}} onClick={() => this.handleClose()}>Close</button>
                 </div>
             </div>
         </Modal>    
@@ -683,20 +723,19 @@ export default class BalanceShipGrid extends React.Component {
                 })
             ) : null
         } 
-        {this.state.downloadReady ? 
-            <DownloadLink
-                className="downloadButton"
-                label="Save"
-                filename= {this.state.manifestName.substring(0, this.state.manifestName.length - 4) + "_OUTBOUND.txt"}
-                exportFile={() => this.state.manifestDataNew}
-                    />:null}
+
         <button onClick={() => this.handleOpenLog()} className="logform ButtonLayout" type="button">Log Form</button>
         <button onClick={() => {this.handleOpenComment()}} className="commentOperator ButtonLayout"> Operator Comment</button>
-        {this.state.showRoute ? <button onClick={() => {this.showInstruction()}} className="showInstructionButton">Show Instructions</button>: null}
-        {!this.state.isShipBalanced ? <button onClick={() => {this.balanceShip()}} className="balanceButton">{!this.state.useSift ? "SIFT" : "Balance Ship"}</button>: null}
-        <button className="performAlgorithm ButtonLayout" onClick={() => {
+        {this.state.showRoute ? <button onClick={() => {this.showInstruction()}} className="showInstructionButton ButtonLayout">Show Instructions</button>: null}
+         {/* <button className="performAlgorithm ButtonLayout" onClick={() => {
             this.isBalanced()
         }}>Check Balance</button>
+        } */}
+
+        {!this.state.checkBalanceClicked? <button className="performAlgorithm ButtonLayout" onClick={() => {
+            this.isBalanced()
+        }}>Check Balance</button> : 
+        <button onClick={() => {this.balanceShip()}} className="balanceButton ButtonLayout">{!this.state.useSift ? "SIFT" : "Balance Ship"}</button> }
         <Link to="/">
             <button className="onLoadPage ButtonLayout">Onload/Offload Page</button>
         </Link>
