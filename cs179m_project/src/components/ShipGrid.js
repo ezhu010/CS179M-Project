@@ -496,17 +496,18 @@ export default class ShipGrid extends React.Component {
                     "text-decoration":"none",
                     "height": "18px"
                 }}
-                label="Save"
+                label="Save And Download"
                 filename= {this.state.manifestName.substring(0, this.state.manifestName.length - 4) + "_OUTBOUND.txt"}
                 exportFile={() => 
                     {
-                    this.finishManifest()
-                    return this.state.manifestDataNew
+                        this.finishManifest()
+                        window.location.reload(false);
+                        return this.state.manifestDataNew
                     }
                 }
                     />
                     : null}
-                    <button className="ButtonLayout" style={{position:"absolute", top:"900px", right:"1120px"}} onClick={() => this.handleClose()}>Close</button>
+                    <button className="ButtonLayout" style={{position:"absolute", top:"900px", right:"1060px"}} onClick={() => this.handleClose()}>Close</button>
                 </div>
             </div>
         </Modal>    
