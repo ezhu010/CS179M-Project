@@ -13,7 +13,7 @@ export default class TransferSearch {
 
     greedySearch(){
         console.log("initialNode", this.initialNode);
-        console.time("search")
+        console.time("search time")
         var count = 0
         this.frontier.push(this.initialNode, this.initialNode.computeHeuristic(this.unloadList, this.loadList))
         // this.frontier.push(this.initialNode, 0)
@@ -35,7 +35,7 @@ export default class TransferSearch {
                 var route = top.traceBackRoot();
                 console.log(route)
                 console.log(top.computeHeuristic(this.unloadList, this.loadList))
-                console.timeEnd("search")
+                console.timeEnd("search time")
                 return [top, route];
             }
 

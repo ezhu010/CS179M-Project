@@ -9,9 +9,8 @@ export default class BalanceSearch {
     }
 
     greedySearch(){
-        console.time("search")
+        console.time("search time")
         var count = 0
-        console.log(this.initialNode)
         this.frontier.push(this.initialNode, this.initialNode.computeHeuristic())
         this.visited.push(this.initialNode)
         while(this.frontier.size > 0){
@@ -27,12 +26,11 @@ export default class BalanceSearch {
             }
             
             if (top.howBalanced() >= 0.9) {
-                console.log("count:", count);
+                console.log("Expanded nodes:", count);
                 var route = top.traceBackRoot();
                 top.returnCranePos()
                 console.log("TOP:", top)
-                console.log(top.computeHeuristic())
-                console.timeEnd("search")
+                console.timeEnd("search time")
                 return [top, route];
             }
             this.frontier.pop() 

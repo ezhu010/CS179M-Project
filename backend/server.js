@@ -43,7 +43,6 @@ next()
 });
 
 app.post("/CycleLog", (req, res, next) => {
-  console.log("in here");
   fs.appendFile('../cs179m_project/Logs/log.txt', req.body.logMessage, err => {
     if (err) {
       console.error(err)
